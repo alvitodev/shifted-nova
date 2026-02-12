@@ -1,5 +1,5 @@
 {
-  "name": "deploy-build-dist-to-workers-sites",
+  "name": "shifted-nova",
   "compatibility_date": "2026-02-12",
     "assets": {
       "directory": "./dist"
