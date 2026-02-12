@@ -1,0 +1,7 @@
+{
+  "name": "Deploy build /dist to Workers Sites",
+  "compatibility_date": "2026-02-12",
+    "assets": {
+      "directory": "./dist"
+  }
+}	
