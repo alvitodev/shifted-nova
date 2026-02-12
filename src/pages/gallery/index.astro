@@ -1,0 +1,101 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { formatDate } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
+import { getCollection } from 'astro:content'
+
+// Ambil data gallery
+const galleryItems = await getCollection('gallery')
+const sortedGallery = galleryItems.sort(
+  (a, b) => b.data.dateTaken.valueOf() - a.data.dateTaken.valueOf(),
+)
+---
+
+<Layout title="Visuals // Gallery">
+  <div class="mx-auto min-h-screen max-w-7xl p-4 md:p-8">
+    {/* --- HEADER --- */}
+    <header
+      class="mt-8 mb-10 flex items-end justify-between border-b border-zinc-800 pb-6"
+    >
+      <div>
+        <div class="mb-2 flex items-center gap-3">
+          <div class="h-3 w-3 rounded-full bg-purple-500"></div>
+          <span class="font-mono text-xs tracking-[0.2em] text-purple-500"
+            >VISUALS // DATABANKS</span
+          >
+        </div>
+        <h1
+          class="text-foreground font-mono text-4xl font-black tracking-tighter uppercase md:text-5xl"
+        >
+          OPTICAL_SENSORS
+        </h1>
+      </div>
+      <div class="hidden text-right font-mono text-xs text-zinc-500 md:block">
+        <p>CAPACITY: 12TB</p>
+        <p>STATUS: RECORDING</p>
+      </div>
+    </header>
+
+    {/* --- GALLERY GRID --- */}
+    {
+      sortedGallery.length > 0 ? (
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {sortedGallery.map((photo) => (
+            <div class="group relative aspect-square cursor-pointer overflow-hidden border border-zinc-800 bg-zinc-900">
+              {/* Image */}
+              <img
+                src={photo.data.image}
+                alt={photo.data.title}
+                class="h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
+              />
+
+              {/* Viewfinder Overlay (Muncul saat Hover) */}
+              <div class="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent to-black/40 p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                {/* Top Info */}
+                <div class="flex items-start justify-between font-mono text-[10px] text-white/80">
+                  <span class="border border-white/30 px-1">REC</span>
+                  <span>{formatDate(photo.data.dateTaken)}</span>
+                </div>
+
+                {/* Crosshair Center */}
+                <div class="absolute top-1/2 left-1/2 flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/50">
+                  <div class="h-0.5 w-0.5 bg-white" />
+                </div>
+
+                {/* Bottom Info */}
+                <div class="space-y-1">
+                  <h3 class="font-mono text-sm font-bold text-white">
+                    {photo.data.title}
+                  </h3>
+                  {photo.data.location && (
+                    <div class="flex items-center gap-1 font-mono text-[10px] text-zinc-300">
+                      <Icon name="lucide:map-pin" class="size-3" />
+                      {photo.data.location}
+                    </div>
+                  )}
+                  {photo.data.camera && (
+                    <div class="flex items-center gap-1 font-mono text-[10px] text-zinc-400">
+                      <Icon name="lucide:camera" class="size-3" />
+                      {photo.data.camera}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Corner Brackets (Hiasan Viewfinder) */}
+              <div class="absolute top-2 left-2 h-2 w-2 border-t border-l border-white/50 opacity-0 transition-opacity group-hover:opacity-100" />
+              <div class="absolute top-2 right-2 h-2 w-2 border-t border-r border-white/50 opacity-0 transition-opacity group-hover:opacity-100" />
+              <div class="absolute bottom-2 left-2 h-2 w-2 border-b border-l border-white/50 opacity-0 transition-opacity group-hover:opacity-100" />
+              <div class="absolute right-2 bottom-2 h-2 w-2 border-r border-b border-white/50 opacity-0 transition-opacity group-hover:opacity-100" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="flex h-64 flex-col items-center justify-center rounded border border-dashed border-zinc-800 bg-zinc-900/20 font-mono text-zinc-500">
+          <p>// NO_VISUALS_LOGGED</p>
+          <p class="mt-2 text-xs">Add entries in src/content/gallery/</p>
+        </div>
+      )
+    }
+  </div>
+</Layout>

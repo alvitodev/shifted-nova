@@ -1,0 +1,94 @@
+---
+title: 'Advanced Home Lab'
+description: 'Infrastruktur self-hosted yang berjalan di atas hardware daur ulang, memanfaatkan Proxmox VE, LXC, dan Docker untuk efisiensi maksimal.'
+publishDate: 2025-01-21
+updatedDate: 2026-01-21
+techStack:
+  ['Proxmox', 'LXC', 'Docker', 'Ubuntu', 'Tailscale', 'Jellyfin', 'PostgreSQL', 'N8N']
+status: 'maintained'
+heroImage: ''
+---
+
+## Overview
+
+**Advanced Home Lab** adalah proyek infrastruktur *self-hosted* yang saya bangun untuk mensimulasikan lingkungan *production server* secara lokal. Proyek ini bertujuan untuk mendapatkan kedaulatan data penuh (*data sovereignty*), menjalankan layanan otomatisasi, dan menyediakan media server pribadi tanpa bergantung pada layanan Cloud berbayar.
+
+Tantangan utama dari proyek ini adalah **efisiensi**. Menggunakan pendekatan *"Upcycling Hardware"*, saya mengubah laptop lawas menjadi server virtualisasi yang tangguh dengan arsitektur *container-based* yang sangat hemat daya namun tetap performan.
+
+## Hardware Specifications
+
+Server ini berjalan secara *headless* (tanpa monitor/keyboard) di atas laptop ASUS Vivobook X441M dengan manajemen daya yang telah dimodifikasi agar tetap beroperasi saat *lid* tertutup.
+
+| Komponen | Spesifikasi | Peran |
+| :--- | :--- | :--- |
+| **Host Unit** | ASUS Vivobook X441M | Server Utama |
+| **CPU** | Intel Celeron N4000 (2 Cores, 2 Threads) | Komputasi Hemat Daya |
+| **RAM** | 8GB DDR4 | Memori untuk LXC & Cache |
+| **Storage (OS)** | 120GB SSD (KLEVV NEO N400) | Proxmox OS & Docker Rootfs |
+| **Storage (Data)** | 1TB HDD (Toshiba) | *Cold Storage* (Media & Backup) |
+| **Power** | AC Power + Built-in Battery | Berfungsi sebagai UPS alami |
+
+## Architecture & Topology
+
+Mengingat keterbatasan CPU Celeron N4000, saya menghindari penggunaan Virtual Machine (VM) penuh yang memiliki *overhead* tinggi. Sebagai gantinya, saya menerapkan arsitektur **Nested Containerization**:
+
+**Proxmox VE (Host) → LXC Container (Docker Host) → Docker Containers (Services)**
+
+### Architectural Decisions
+
+1.  **LXC sebagai Docker Host:**
+    Saya menjalankan Docker Engine di dalam LXC *unprivileged container*. Ini memberikan performa *near-native* karena LXC berbagi kernel dengan host Proxmox, meminimalkan penggunaan CPU dibandingkan VM tradisional.
+
+2.  **Storage Bind-Mounting:**
+    Untuk menangani HDD 1TB yang berisi data portabel (NTFS), saya melakukan *mounting* di level Proxmox Host, kemudian meneruskannya ke LXC menggunakan fitur **Bind Mount**.
+    * **Keuntungan:** Kontainer Docker bisa membaca/tulis data fisik secara langsung tanpa *layer* virtual disk (qcow2/raw) yang lambat.
+    * **Mekanisme:** Host Path `/mnt/ntfs-multimedia` → LXC Path `/mnt/media`.
+
+3.  **Network Isolation & Access:**
+    * **Local:** Server memiliki IP Statis dan terhubung via LAN untuk stabilitas.
+    * **Remote:** Menggunakan **Tailscale** (Mesh VPN) untuk akses administrasi aman tanpa membuka port publik.
+    * **Public Exposure:** Menggunakan **Playit.gg** untuk *tunneling* spesifik (seperti Minecraft Server) guna menembus CGNAT ISP.
+
+## Software Stack & Services
+
+Seluruh aplikasi diorkestrasi menggunakan **Docker Compose** dengan struktur direktori terpusat (`~/srv`) untuk kemudahan backup dan manajemen.
+
+### 1. Media & Entertainment
+* **Jellyfin:** Media server utama. Dikonfigurasi untuk *Direct Play* agar tidak membebani CPU dengan transcoding. Menggunakan penamaan file standar (S01E01) agar metadata otomatis terdeteksi.
+* **Kavita:** Server *e-book* dan majalah digital. Mendukung format PDF dan EPUB dengan *web-reader* yang responsif.
+* **Transmission:** BitTorrent client yang berjalan via Docker, dengan *volume mapping* langsung ke HDD eksternal.
+* **Minecraft Server:** Server Fabric versi 1.21.6 yang dioptimalkan untuk *low-latency multiplayer*.
+
+### 2. Automation & Productivity
+* **n8n:** Workflow automation tool. Digunakan untuk menghubungkan berbagai API dan mengotomatiskan tugas-tugas rutin.
+* **Filebrowser:** Web-based file manager untuk mengelola file server dari browser tanpa perlu akses SSH/FTP.
+* **Uptime Kuma:** Monitoring dashboard untuk memantau status *downtime* layanan internal maupun eksternal.
+
+### 3. Databases
+* **PostgreSQL & MariaDB:** Database backend terpusat. Layanan seperti n8n dan bot kustom dikonfigurasi untuk menggunakan instance database ini daripada SQLite bawaan demi performa yang lebih baik.
+
+## Key Engineering Challenges
+
+### 1. NTFS Permission pada Linux Container
+**Masalah:** Menghubungkan HDD berformat NTFS ke Docker Container Linux sering menyebabkan error `Permission Denied` karena ketidakcocokan sistem *file permission* (POSIX vs Windows).
+**Solusi:**
+* Menggunakan driver `ntfs-3g` pada Proxmox Host.
+* Melakukan mounting dengan `umask=000` di `/etc/fstab` agar *readable/writable* oleh semua user.
+* Mengatur `PUID` dan `PGID` (1000) pada container Docker agar sesuai dengan user `homelab` di host LXC.
+
+### 2. Resource Constraints (Celeron N4000)
+**Masalah:** CPU dual-core mudah mencapai 100% usage jika menjalankan proses berat.
+**Solusi:**
+* Menghindari *transcoding* video; memaksa klien untuk *Direct Play*.
+* Membatasi log sistem dan mematikan servis yang tidak esensial.
+* Menggunakan LXC alih-alih VM.
+
+## Future Roadmap
+
+Pengembangan infrastruktur ini masih terus berjalan. Beberapa rencana ke depan meliputi:
+
+* [ ] Implementasi **Reverse Proxy** (Nginx Proxy Manager) dengan SSL Certificate lokal.
+* [ ] Automasi backup volume Docker ke Cloud Storage terenkripsi (Restic/Rclone).
+* [ ] Migrasi penuh database n8n dari SQLite ke PostgreSQL.
+* [ ] Implementasi Monitoring Stack (Prometheus + Grafana) untuk visualisasi metrik server yang lebih detail.
+

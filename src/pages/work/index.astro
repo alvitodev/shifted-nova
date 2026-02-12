@@ -1,0 +1,58 @@
+---
+import ProjectCard from '@/components/ProjectCard.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getAllWork } from '@/lib/data-utils'
+
+// Ambil semua proyek
+const projects = await getAllWork()
+---
+
+<Layout title="Work // Projects">
+  <div class="mx-auto min-h-screen max-w-7xl p-4 md:p-8">
+    {/* Header Tetap Sama ... */}
+    <header class="mt-8 mb-12 border-b border-zinc-800 pb-8">
+      {/* ... kode header lama ... */}
+      <div class="mb-4 flex items-center gap-3">
+        <div class="h-3 w-3 animate-pulse rounded-sm bg-yellow-500"></div>
+        <span class="font-mono text-xs tracking-[0.2em] text-yellow-500"
+          >DATABASE // WORK</span
+        >
+      </div>
+      <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div>
+          <h1
+            class="text-foreground mb-2 font-mono text-4xl font-black tracking-tighter md:text-6xl"
+          >
+            ACTIVE_PROTOCOLS
+          </h1>
+          <p class="font-mono text-xs text-zinc-500 md:text-sm">
+            &gt; EXEC_LIST_ALL_PROJECTS... ({projects.length} entries) <span
+              class="animate-pulse">_</span
+            >
+          </p>
+        </div>
+      </div>
+    </header>
+
+    {/* --- PROJECT LIST (UPDATED LAYOUT) --- */}
+    {/* Menggunakan Flex Col alih-alih Grid agar memanjang ke bawah */}
+    {
+      projects.length > 0 ? (
+        <div class="flex flex-col gap-8 md:gap-12">
+          {projects.map((project, index) => (
+            /* Pass 'index' ke komponen untuk logika selang-seling */
+            <ProjectCard project={project} index={index} />
+          ))}
+        </div>
+      ) : (
+        /* State Kosong */
+        <div class="flex h-64 flex-col items-center justify-center rounded border border-dashed border-zinc-800 bg-zinc-900/20 font-mono text-zinc-500">
+          <p>// NO_DATA_FOUND</p>
+          <p class="mt-2 text-xs">
+            Initialize new projects in src/content/work/
+          </p>
+        </div>
+      )
+    }
+  </div>
+</Layout>

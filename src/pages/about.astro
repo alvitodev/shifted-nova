@@ -1,0 +1,245 @@
+---
+import Panel from '@/components/Panel.astro'
+import Layout from '@/layouts/Layout.astro'
+
+// Data Skill (Bisa dipindah ke content collection nanti jika mau)
+const skills = [
+  { name: 'JavaScript / TypeScript', level: 90 },
+  { name: 'React / Astro', level: 85 },
+  { name: 'Node.js', level: 80 },
+  { name: 'UI/UX Design', level: 75 },
+  { name: 'DevOps / CI/CD', level: 60 },
+]
+
+// Data Experience (Mission Log)
+const experience = [
+  {
+    role: 'FULLSTACK ENGINEER',
+    company: 'FREELANCE',
+    date: '2023 - PRESENT',
+    desc: 'Mengembangkan aplikasi web modern menggunakan teknologi stack terkini (Astro, React, Tailwind). Fokus pada performa dan aksesibilitas.',
+  },
+  {
+    role: 'INFORMATICS STUDENT',
+    company: 'UNIVERSITAS NEGERI YOGYAKARTA',
+    date: '2024 - PRESENT',
+    desc: 'Mempelajari dasar-dasar ilmu komputer, algoritma, dan struktur data. Aktif dalam organisasi kemahasiswaan teknologi.',
+  },
+]
+---
+
+<Layout title="Personnel File // Alvito">
+  <div class="mx-auto min-h-screen max-w-6xl p-4 md:p-8">
+    {/* Header Halaman */}
+    <header class="mb-8 border-b border-zinc-800 pb-6">
+      <div class="mb-2 flex items-center gap-3">
+        <div class="h-3 w-3 rounded-sm bg-yellow-500"></div>
+        <span class="font-mono text-xs tracking-[0.2em] text-yellow-500"
+          >CLASSIFIED // PERSONNEL_FILE</span
+        >
+      </div>
+      <h1
+        class="text-foreground font-mono text-4xl font-black tracking-tighter uppercase md:text-5xl"
+      >
+        OPERATOR_PROFILE
+      </h1>
+    </header>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+      {/* --- KOLOM KIRI (Profil & Skill) --- */}
+      <div class="flex flex-col gap-6 md:col-span-4">
+        {/* ID CARD PANEL */}
+        <Panel title="// IDENTIFICATION">
+          <div class="flex flex-col items-center text-center">
+            {/* Foto Profil dengan Efek Hexagon/Kotak */}
+            <div
+              class="group relative mb-4 h-32 w-32 overflow-hidden border-2 border-zinc-700 bg-zinc-800"
+            >
+              <div
+                class="pointer-events-none absolute inset-0 z-10 bg-yellow-500/10 opacity-0 mix-blend-overlay transition-opacity group-hover:opacity-100"
+              >
+              </div>
+              {/* Ganti src dengan foto profil Anda */}
+              <img
+                src="/static/logo.png"
+                alt="Profile"
+                class="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
+              />
+              {/* Dekorasi Sudut Foto */}
+              <div class="absolute top-0 right-0 h-2 w-2 bg-yellow-500"></div>
+              <div class="absolute bottom-0 left-0 h-2 w-2 bg-zinc-500"></div>
+            </div>
+
+            <h2
+              class="text-foreground font-mono text-2xl font-bold tracking-tight"
+            >
+              ALVITO
+            </h2>
+            <p class="mt-1 mb-4 font-mono text-xs text-yellow-500">
+              LVL. 20 // DEVELOPER
+            </p>
+
+            <div
+              class="w-full space-y-2 border border-zinc-800 bg-zinc-950/50 p-4 text-left font-mono text-xs text-zinc-400"
+            >
+              <div class="flex justify-between">
+                <span>STATUS:</span>
+                <span class="text-green-500">ACTIVE</span>
+              </div>
+              <div class="flex justify-between">
+                <span>LOC:</span>
+                <span>YOGYAKARTA, ID</span>
+              </div>
+              <div class="flex justify-between">
+                <span>SPECIALTY:</span>
+                <span>WEB_OPS</span>
+              </div>
+            </div>
+          </div>
+        </Panel>
+
+        {/* SKILL MATRIX */}
+        <Panel title="// SKILL_MATRIX">
+          <div class="space-y-4">
+            {
+              skills.map((skill) => (
+                <div>
+                  <div class="mb-1 flex justify-between font-mono text-[10px] text-zinc-500">
+                    <span>{skill.name}</span>
+                    <span>{skill.level}%</span>
+                  </div>
+                  <div class="h-1.5 w-full border border-zinc-700 bg-zinc-800">
+                    <div
+                      class="relative h-full bg-yellow-500/80"
+                      style={`width: ${skill.level}%`}
+                    >
+                      {/* Efek kilauan di ujung bar */}
+                      <div class="absolute top-0 right-0 bottom-0 w-1 bg-white/50" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </Panel>
+
+        {/* CONTACT */}
+        <Panel title="// COMM_CHANNELS">
+          <div class="flex flex-col gap-2">
+            <a
+              href="mailto:email@alvito.dev"
+              class="group flex items-center justify-between border border-zinc-800 p-2 transition-colors hover:border-yellow-500/50 hover:bg-zinc-900"
+            >
+              <span
+                class="group-hover:text-foreground font-mono text-xs text-zinc-400"
+                >ENCRYPTED_MAIL</span
+              >
+              <span
+                class="text-[10px] text-yellow-500 opacity-0 transition-opacity group-hover:opacity-100"
+                >&gt;&gt; SEND</span
+              >
+            </a>
+            <a
+              href="https://github.com/alvitodev"
+              target="_blank"
+              class="group flex items-center justify-between border border-zinc-800 p-2 transition-colors hover:border-yellow-500/50 hover:bg-zinc-900"
+            >
+              <span
+                class="group-hover:text-foreground font-mono text-xs text-zinc-400"
+                >GITHUB_REPO</span
+              >
+              <span
+                class="text-[10px] text-yellow-500 opacity-0 transition-opacity group-hover:opacity-100"
+                >&gt;&gt; ACCESS</span
+              >
+            </a>
+          </div>
+        </Panel>
+      </div>
+
+      {/* --- KOLOM KANAN (Bio & Timeline) --- */}
+      <div class="flex flex-col gap-6 md:col-span-8">
+        {/* BIO / ABSTRACT */}
+        <Panel title="// ABSTRACT">
+          <div
+            class="prose prose-invert prose-zinc prose-p:text-sm prose-p:font-mono prose-p:text-zinc-400 max-w-none"
+          >
+            <p>
+              Halo, saya Alvito. Seorang pengembang perangkat lunak yang
+              berfokus pada pembangunan antarmuka web yang fungsional dan
+              estetis. Saya tertarik pada konsep desain Industrial Sci-Fi,
+              Cyberpunk, dan sistem yang terorganisir dengan rapi.
+            </p>
+            <p>
+              Saat ini saya sedang menempuh pendidikan di Universitas Negeri
+              Yogyakarta dan terus mengeksplorasi teknologi web modern seperti
+              Astro, React, dan Tailwind CSS. Tujuan utama saya adalah
+              menciptakan pengalaman digital yang tidak hanya bekerja dengan
+              baik, tetapi juga memiliki karakter yang kuat.
+            </p>
+          </div>
+        </Panel>
+
+        {/* MISSION LOG (TIMELINE) */}
+        <Panel title="// MISSION_LOG">
+          <div class="relative space-y-8 pl-2">
+            {/* Garis vertikal timeline */}
+            <div
+              class="absolute top-2 bottom-2 left-[19px] w-[1px] border-l border-dashed border-zinc-700 bg-zinc-800"
+            >
+            </div>
+
+            {
+              experience.map((exp) => (
+                <div class="group relative pl-12">
+                  {/* Titik Timeline */}
+                  <div class="absolute top-1.5 left-[14px] h-2.5 w-2.5 rotate-45 rounded-sm border border-zinc-600 bg-zinc-950 transition-colors group-hover:border-yellow-500 group-hover:bg-yellow-500/20" />
+
+                  <div class="mb-1 flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
+                    <h3 class="text-foreground font-mono text-lg font-bold transition-colors group-hover:text-yellow-500">
+                      {exp.role}
+                    </h3>
+                    <span class="rounded border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-mono text-xs text-zinc-500">
+                      {exp.date}
+                    </span>
+                  </div>
+
+                  <span class="mb-2 block font-mono text-xs tracking-wider text-yellow-500/80">
+                    AT {exp.company}
+                  </span>
+
+                  <p class="border-l-2 border-zinc-800 pl-4 text-sm leading-relaxed text-zinc-400 transition-colors group-hover:border-yellow-500/30">
+                    {exp.desc}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </Panel>
+
+        {/* EQUIPMENT / TOOLS */}
+        <Panel title="// STANDARD_ISSUE_GEAR">
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {
+              [
+                'VS Code',
+                'Zed Editor',
+                'Figma',
+                'Git',
+                'Terminal',
+                'Node.js',
+                'Chrome',
+                'Spotify',
+              ].map((tool) => (
+                <div class="flex items-center gap-2 border border-zinc-800 bg-zinc-900/30 p-2">
+                  <div class="h-1 w-1 bg-yellow-500" />
+                  <span class="font-mono text-xs text-zinc-300">{tool}</span>
+                </div>
+              ))
+            }
+          </div>
+        </Panel>
+      </div>
+    </div>
+  </div>
+</Layout>

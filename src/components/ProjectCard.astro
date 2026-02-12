@@ -1,0 +1,124 @@
+---
+import { Image } from 'astro:assets'
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  project: CollectionEntry<'work'>
+  index: number
+}
+
+const { project, index } = Astro.props
+const isImageRight = index % 2 !== 0 // Ganjil = Kanan, Genap = Kiri (atau sebaliknya, sesuaikan selera)
+---
+
+<a href={`/work/${project.id}`} class="group mb-12 block w-full">
+  <div
+    class={`
+    relative flex flex-col md:flex-row w-full
+    border border-zinc-800 bg-zinc-950/80 backdrop-blur-md
+    hover:border-yellow-500/50 transition-all duration-500
+    ${isImageRight ? 'md:flex-row-reverse' : ''}
+  `}
+  >
+    {/* --- IMAGE SECTION (Full Bleed) --- */}
+    <div
+      class="relative h-64 w-full overflow-hidden border-r border-zinc-800 bg-zinc-900 md:h-auto md:w-[55%]"
+    >
+      {/* 1. Gambar Dasar */}
+      {
+        project.data.heroImage && (
+          <Image
+            src={project.data.heroImage}
+            alt={project.data.title}
+            width={800}
+            height={500}
+            class="h-full w-full object-cover opacity-60 grayscale transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0"
+          />
+        )
+      }
+
+      {/* 2. Tech Grid Overlay (Efek Kotak-kotak Halus) */}
+      <div
+        class="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:24px_24px] opacity-30 mix-blend-overlay"
+      >
+      </div>
+
+      {/* 3. Glitch/Block Fade Mask (Gradasi Kasar ke arah konten) */}
+      <div
+        class={`absolute inset-0 z-20 pointer-events-none bg-gradient-to-${isImageRight ? 'l' : 'r'} from-zinc-950 via-zinc-950/20 to-transparent`}
+      >
+      </div>
+
+      {/* 4. Dekorasi Sudut (Corner Brackets) */}
+      <div
+        class="absolute top-0 left-0 z-30 h-8 w-8 border-t-2 border-l-2 border-yellow-500/0 transition-colors group-hover:border-yellow-500/100"
+      >
+      </div>
+      <div
+        class="absolute right-0 bottom-0 z-30 h-8 w-8 border-r-2 border-b-2 border-yellow-500/0 transition-colors group-hover:border-yellow-500/100"
+      >
+      </div>
+    </div>
+
+    {/* --- CONTENT SECTION --- */}
+    <div
+      class="relative flex w-full flex-col justify-between p-6 md:w-[45%] md:p-8"
+    >
+      {/* Background Scanline khusus area teks */}
+      <div
+        class="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_2px,#18181b_2px)] bg-[size:100%_4px] opacity-20"
+      >
+      </div>
+
+      <div>
+        {/* Header: Status & Title */}
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <h3
+            class="font-mono text-2xl font-black tracking-tight text-zinc-100 uppercase transition-colors group-hover:text-yellow-500"
+          >
+            {project.data.title}
+          </h3>
+          <div
+            class={`shrink-0 px-2 py-1 text-[10px] font-mono border rounded uppercase tracking-wider ${
+              project.data.status === 'completed'
+                ? 'border-green-900 text-green-500 bg-green-900/10'
+                : 'border-yellow-900 text-yellow-500 bg-yellow-900/10'
+            }`}
+          >
+            {project.data.status}
+          </div>
+        </div>
+
+        <p
+          class="mb-6 line-clamp-3 font-mono text-sm leading-relaxed text-zinc-400"
+        >
+          {project.data.description}
+        </p>
+      </div>
+
+      {/* Footer: Tech Stack & Action */}
+      <div class="space-y-4">
+        <div class="h-px w-full bg-zinc-800"></div>
+        {/* Separator Line */}
+
+        <div class="flex flex-wrap gap-2">
+          {
+            project.data.techStack
+              .slice(0, 4)
+              .map((t) => (
+                <span class="border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-500 uppercase transition-colors group-hover:border-zinc-500 group-hover:text-zinc-300">
+                  {t}
+                </span>
+              ))
+          }
+        </div>
+
+        <div
+          class="flex translate-x-[-10px] transform items-center gap-2 font-mono text-xs text-yellow-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+        >
+          <span class="animate-pulse">></span> INITIALIZING_SEQUENCE...
+        </div>
+      </div>
+    </div>
+  </div>
+</a>

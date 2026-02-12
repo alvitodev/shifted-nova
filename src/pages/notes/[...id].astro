@@ -1,0 +1,79 @@
+---
+import Panel from '@/components/Panel.astro'
+import Layout from '@/layouts/Layout.astro'
+import { formatDate } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
+import { getCollection, render } from 'astro:content'
+
+// Generate Static Paths
+export async function getStaticPaths() {
+  const notes = await getCollection('notes')
+  return notes.map((note) => ({
+    params: { id: note.id },
+    props: { note },
+  }))
+}
+
+const { note } = Astro.props
+const { Content } = await render(note)
+---
+
+<Layout 
+  title={note.data.title}
+  type="article"
+  publishDate={note.data.publishDate}
+>
+  <div class="mx-auto min-h-screen max-w-3xl p-4 md:p-8">
+    {/* Navigasi Kembali */}
+    <div class="mb-6">
+      <a
+        href="/notes"
+        class="font-mono text-xs text-muted-foreground transition-colors hover:text-yellow-500"
+      >
+        &lt; BACK_TO_SNIPPETS
+      </a>
+    </div>
+
+    {/* KONTEN UTAMA */}
+    <Panel class="min-h-[60vh] p-8">
+      {/* Header Artikel */}
+      <header class="mb-8 border-b border-border pb-6">
+        <div
+          class="mb-4 flex flex-wrap items-center gap-4 font-mono text-xs text-muted-foreground"
+        >
+          <span class="text-yellow-500">ID: {note.id}</span>
+          <span>//</span>
+          <span>{formatDate(note.data.publishDate)}</span>
+        </div>
+
+        <h1 class="text-foreground font-mono text-3xl font-bold tracking-tight">
+          {note.data.title}
+        </h1>
+
+        {/* Tags */}
+        <div class="mt-4 flex gap-2">
+          {
+            (note.data.tags ?? []).map((tag) => (
+              <span class="rounded border border-border bg-card px-2 py-1 font-mono text-xs text-muted-foreground">
+                <Icon name="lucide:hash" class="mr-1 inline-block size-3" />
+                {tag}
+              </span>
+            ))
+          }
+        </div>
+      </header>
+
+      {/* Render Markdown Content */}
+      <article
+        class="prose dark:prose-invert prose-zinc prose-headings:font-mono prose-p:text-muted-foreground prose-pre:border prose-pre:border-border prose-pre:bg-muted max-w-none"
+      >
+        <Content />
+      </article>
+
+      {/* Footer Artikel */}
+      <div class="mt-12 border-t border-border pt-6 text-center">
+        <p class="font-mono text-xs text-muted-foreground">*** END_OF_NOTE ***</p>
+      </div>
+    </Panel>
+  </div>
+</Layout>

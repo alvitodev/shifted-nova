@@ -1,0 +1,48 @@
+name: Deploy Astro to GitHub Pages
+
+on:
+  push:
+    # CI/CD hanya akan berjalan saat ada push ke branch 'main'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    # Anda bisa memilih runner yang lebih murah jika mau, tapi ubuntu-latest sudah standar
+    runs-on: ubuntu-latest 
+
+    steps:
+      # 1. Checkout kode dari branch 'dev'
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          # Penting: Mengambil riwayat git lengkap agar deployment bisa berjalan
+          fetch-depth: 0 
+
+      # 2. Setup Node.js dan install dependencies
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Gunakan versi Node.js yang direkomendasikan Astro
+
+      - name: Install dependencies
+        run: npm install
+
+      # 3. Build Proyek Astro
+      - name: Build Astro Project
+        run: npm run build
+        # Output build akan berada di folder 'dist' (default Astro)
+
+      # 4. Deployment ke GitHub Pages (Branch 'main')
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # TOKEN GITHUB untuk hak akses deployment
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Menentukan direktori hasil build
+          publish_dir: ./dist
+          # Menentukan branch tujuan deployment (branch utama yang dibaca GH Pages)
+          publish_branch: build
+          # Mengatur direktori build agar selalu di-overwrite
+          force_orphan: true

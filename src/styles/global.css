@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+@plugin 'tailwindcss-animate';
+
+@theme inline {
+  /* FONT CONFIG: Jakarta untuk Teks, JetBrains untuk Code/Header */
+  --font-sans:
+    'Plus Jakarta Sans', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  
+  --font-mono:
+    'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+
+  /* Mapping CSS Variables ke Utility Tailwind */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  /* --- LIGHT MODE (Industrial Clean) --- */
+  :root {
+    /* Background: Putih "Kertas" (Zinc-50) */
+    --background: 0 0% 98%; 
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    /* Primary: Kuning Emas Gelap (Yellow-600) */
+    --primary: 42 100% 40%; 
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary: Gelapkan agar terlihat beda dari background putih */
+    --secondary: 240 5% 90%; /* FIX: Lebih gelap (sebelumnya 96%) */
+    --secondary-foreground: 240 5.9% 10%;
+
+    /* Muted: Gelapkan agar area non-aktif terlihat jelas */
+    --muted: 240 5% 90%; /* FIX: Lebih gelap (sebelumnya 93%) */
+    --muted-foreground: 240 4% 40%; /* Teks abu gelap */
+
+    --accent: 240 5% 90%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border: Lebih tegas agar struktur terlihat */
+    --border: 240 5% 82%; /* FIX: Lebih gelap/tegas (sebelumnya 85%) */
+    --input: 240 5% 82%;
+    --ring: 42 100% 40%;
+
+    /* Grid Color: Sedikit lebih terlihat */
+    --grid-color: rgba(0, 0, 0, 0.1);
+    
+    --vignette-color: rgba(0,0,0,0.03); 
+  }
+
+  /* --- DARK MODE (Cyberpunk Industrial) --- */
+  .dark {
+    /* Background: Zinc-950 (Sangat Gelap tapi bukan Hitam mati) */
+    --background: 24 10% 5%; 
+    
+    /* Foreground: Putih Tulang (Zinc-200), BUKAN Putih Murni agar mata tidak sakit */
+    --foreground: 240 5% 90%; /* FIX: Turun dari 98% ke 90% */
+
+    --card: 24 10% 7%; /* Card sedikit lebih terang dari background agar punya dimensi */
+    --card-foreground: 240 5% 90%;
+
+    --popover: 24 10% 5%;
+    --popover-foreground: 240 5% 90%;
+
+    /* Primary: Kuning Safety/Neon (Yellow-400) */
+    --primary: 48 96% 53%;
+    --primary-foreground: 24 9.8% 5%;
+
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 4% 12%; 
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 4% 20%;
+    --input: 240 4% 20%;
+    --ring: 48 96% 53%;
+
+    --grid-color: #27272a;
+    --vignette-color: rgba(0,0,0,0.7);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased transition-colors duration-300;
+    
+    /* Background Grid Pattern */
+    background-image: 
+      linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+  }
+
+  /* CLASS KHUSUS VIGNETTE */
+  .vignette-layer {
+    background: radial-gradient(
+      circle at center, 
+      transparent 40%, 
+      var(--vignette-color) 100%
+    );
+  }
+
+  /* Custom Scrollbar Industrial */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-200 dark:bg-zinc-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-400 dark:bg-zinc-700 rounded-sm border-2 border-transparent bg-clip-content;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-yellow-600 dark:bg-yellow-400; /* Hover jadi Kuning */
+  }
+}

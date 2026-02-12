@@ -1,0 +1,161 @@
+---
+title: "BudgieVB: Manajer Keuangan Personal"
+description: "Aplikasi desktop manajemen keuangan pribadi (Personal Cashflow) dengan fitur multi-currency, budgeting, dan visualisasi grafik interaktif menggunakan ScottPlot."
+publishDate: 2024-06-20
+techStack: ['Visual Basic .NET', 'MySQL', 'ScottPlot', 'WinForms']
+status: 'completed'
+heroImage: './dashboard.png'
+repoLink: "https://github.com/alvitodev/BudgieVB"
+tags: ["Desktop App", "Finance", "Data Visualization"]
+---
+
+import Callout from '@/components/Callout.astro'
+
+## Mengapa BudgieVB?
+
+Kebanyakan aplikasi keuangan terlalu rumit atau justru terlalu simpel. **BudgieVB** (Budgie Visual Basic) lahir dari kebutuhan tugas akhir mata kuliah **Pemrograman Visual** untuk menciptakan aplikasi desktop yang *robust* namun tetap intuitif.
+
+Aplikasi ini tidak sekadar mencatat pengeluaran, tapi juga membantu Anda memvisualisasikan kesehatan finansial melalui grafik yang *real-time*.
+
+![Tampilan Dashboard BudgieVB](https://placehold.co/800x450/0f172a/22c55e?text=User+Interface+Aplikasi&font=roboto)
+
+## Arsitektur & Alur Kerja
+
+Agar Anda paham cara kerjanya, mari kita bedah "otak" aplikasi ini. BudgieVB menggunakan arsitektur event-driven khas Windows Forms yang terhubung ke database MySQL lokal.
+
+### 1. Diagram Alur Data (Data Flow)
+
+Berikut adalah perjalanan data saat Anda mencatat transaksi baru:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as Form Transaksi
+    participant Logic as VB.NET Logic
+    participant DB as MySQL Database
+    participant Chart as ScottPlot Chart
+
+    User->>UI: Input Jumlah & Kategori
+    UI->>Logic: Validasi Input (Tidak boleh 0/Minus)
+    Logic->>DB: INSERT INTO transactions...
+    DB-->>Logic: Success
+    Logic->>UI: Reset Form
+    Logic->>Chart: Request Data Terbaru
+    DB-->>Logic: SELECT SUM(amount)...
+    Logic->>Chart: Re-render Grafik
+    Chart-->>UI: Update Tampilan Pie Chart
+```
+
+### 2. Struktur Database
+
+Aplikasi ini menggunakan database relasional untuk menjaga integritas data. Tidak ada lagi cerita saldo minus tanpa alasan.
+
+```mermaid
+erDiagram
+    USERS ||--o{ ACCOUNTS : owns
+    ACCOUNTS ||--o{ TRANSACTIONS : has
+    CATEGORIES ||--o{ TRANSACTIONS : classifies
+    CURRENCIES ||--o{ ACCOUNTS : denominated_in
+
+    USERS {
+        int id PK
+        string username
+        string password_hash
+    }
+
+    ACCOUNTS {
+        int id PK
+        string name
+        decimal balance
+        int currency_id FK
+    }
+
+    TRANSACTIONS {
+        int id PK
+        decimal amount
+        date transaction_date
+        string type "Income/Expense"
+        string note
+    }
+```
+
+## Bedah Kode & Struktur File
+
+Jika Anda mengunduh repository ini, berikut adalah peta untuk memahami isinya:
+
+```text
+BudgieVB/
+├── BudgieVB.sln            # File solusi utama (Buka file ini di Visual Studio)
+├── budgie.sql              # Script database (IMPORT INI KE PHPMYADMIN!)
+└── BudgieVB/               # Folder Source Code
+    ├── Forms/              # Semua tampilan GUI ada di sini
+    │   ├── frmLogin.vb     # Gerbang masuk aplikasi
+    │   ├── frmDashboard.vb # Pusat kendali (Ada ScottPlot di sini)
+    │   └── frmAddTx.vb     # Form tambah transaksi
+    ├── Modules/
+    │   └── Database.vb     # "Jantung" koneksi ke MySQL
+    ├── Assets/             # Ikon dan gambar
+    └── App.config          # Konfigurasi koneksi DB (Ganti user/pass DB disini)
+```
+
+<Callout type="warning" title="Penting untuk Developer">
+  File `Modules/Database.vb` adalah file paling krusial. Di sinilah *Connection String* berada. Jika Anda gagal login, cek apakah username/password MySQL di file ini sudah sesuai dengan settingan XAMPP Anda.
+</Callout>
+
+## Algoritma Utama: Validasi Saldo
+
+Salah satu logika terpenting dalam aplikasi keuangan adalah mencegah pengeluaran melebihi saldo akun. Berikut pseudocode-nya:
+
+```vb
+' Logika saat tombol "Simpan Pengeluaran" ditekan
+Function SimpanTransaksi()
+    Dim saldoSekarang = GetCurrentBalance(accountID)
+    Dim pengeluaranBaru = txtAmount.Text
+    
+    ' 1. Cek apakah uang cukup
+    If pengeluaranBaru > saldoSekarang Then
+        ShowError("Saldo tidak cukup! Jangan boros.")
+        Return False
+    End If
+    
+    ' 2. Lakukan Transaksi
+    ExecuteQuery("INSERT INTO transactions ...")
+    
+    ' 3. Update Saldo Akun
+    Dim saldoBaru = saldoSekarang - pengeluaranBaru
+    ExecuteQuery("UPDATE accounts SET balance = " & saldoBaru)
+    
+    Return True
+End Function
+```
+
+## Panduan Instalasi (Cara Pakai)
+
+Ingin mencoba aplikasi ini di komputer Anda? Ikuti langkah ini:
+
+1.  **Persiapan Lingkungan:**
+    *   Install **Visual Studio 2022** (Pilih workload *.NET Desktop Development*).
+    *   Install **XAMPP** (untuk server database MySQL).
+    *   Install **MySQL Connector for .NET** (agar VB bisa ngobrol sama MySQL).
+
+2.  **Setup Database:**
+    *   Nyalakan Apache & MySQL di XAMPP.
+    *   Buka `localhost/phpmyadmin`.
+    *   Buat database baru bernama `budgie_db`.
+    *   Import file `budgie.sql` yang ada di repository.
+
+3.  **Jalankan Aplikasi:**
+    *   Buka `BudgieVB.sln`.
+    *   Tekan tombol **Start** (Ikon Play Hijau).
+    *   Login dengan user default (jika ada di readme) atau register user baru.
+
+## Pustaka Pihak Ketiga
+
+Saya menggunakan **ScottPlot** karena komponen grafik bawaan Visual Studio (MSChart) sudah terasa kuno dan berat. ScottPlot memungkinkan:
+*   Rendering grafik ribuan data dalam hitungan milidetik.
+*   Interaktif (bisa di-zoom dan digeser).
+*   Tampilan modern dan *flat design*.
+
+## Kesimpulan
+
+BudgieVB mengajarkan saya bahwa aplikasi visual yang baik bukan hanya soal *drag-and-drop* tombol, tapi bagaimana menyusun arsitektur data yang rapi di belakang layar. Sinergi antara **MySQL** (Penyimpanan), **VB.NET** (Logika), dan **ScottPlot** (Visualisasi) menghasilkan aplikasi yang *powerful*.

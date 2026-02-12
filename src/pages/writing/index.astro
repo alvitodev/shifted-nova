@@ -1,0 +1,45 @@
+---
+import WritingDashboard from '@/components/react/WritingDashboard' // Import komponen React
+import Layout from '@/layouts/Layout.astro'
+import { getAllWriting } from '@/lib/data-utils'
+
+// 1. Ambil semua data di Server
+const allPosts = await getAllWriting()
+
+// 2. Format data agar sesuai dengan props React (serializable JSON)
+const postsForReact = allPosts.map((post) => ({
+  id: post.id,
+  title: post.data.title,
+  description: post.data.description,
+  publishDate: post.data.publishDate,
+  category: post.data.category,
+  isFeatured: post.data.isFeatured,
+}))
+---
+
+<Layout title="Data Archives">
+  <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 p-4 md:p-8">
+    {/* Header Halaman */}
+    <header class="border-b border-zinc-800 pb-6">
+      <div class="mb-2 flex items-center gap-2">
+        <div class="h-3 w-3 animate-pulse bg-yellow-500"></div>
+        <span class="font-mono text-xs tracking-widest text-yellow-500"
+          >ARCHIVES // WRITING</span
+        >
+      </div>
+      <h1
+        class="text-foreground font-mono text-3xl font-black tracking-tighter md:text-4xl"
+      >
+        NEURAL_LOGS
+      </h1>
+      <p class="mt-2 max-w-xl text-sm text-zinc-500">
+        Kumpulan data, opini, dan catatan teknis. Gunakan terminal di bawah
+        untuk memfilter data.
+      </p>
+    </header>
+
+    {/* React Island: Dashboard Tab */}
+    {/* client:load PENTING agar interaksi Tab berfungsi */}
+    <WritingDashboard client:load posts={postsForReact} />
+  </div>
+</Layout>

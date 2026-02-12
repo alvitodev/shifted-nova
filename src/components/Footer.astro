@@ -1,0 +1,26 @@
+---
+const today = new Date();
+const revision = import.meta.env.PUBLIC_GIT_HASH || 'DEV-MODE';
+---
+
+<footer class="border-t border-zinc-800 bg-zinc-950 py-8 mt-12 text-center md:text-left">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-600">
+    
+    <div class="flex flex-col gap-1">
+      <span>&copy; {today.getFullYear()} ALVITO.DEV. ALL SYSTEMS NOMINAL.</span>
+      <span>BUILT WITH ASTRO // DEPLOYED VIA GITHUB ACTIONS</span>
+    </div>
+
+    <div class="flex items-center gap-6">
+      <a href="https://github.com/alvitodev" target="_blank" class="hover:text-yellow-500 transition-colors">[GITHUB]</a>
+      <a href="https://linkedin.com/in/alvito" target="_blank" class="hover:text-yellow-500 transition-colors">[LINKEDIN]</a>
+      <a href="/rss.xml" class="hover:text-yellow-500 transition-colors">[RSS_FEED]</a>
+    </div>
+
+    <div class="text-right">
+      <p>SITE_REVISION: <span class="text-yellow-500">{revision}</span></p>
+      <p>LATENCY: <span class="text-green-500">LOW</span></p>
+    </div>
+
+  </div>
+</footer>

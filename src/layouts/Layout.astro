@@ -1,0 +1,79 @@
+---
+import '@/styles/global.css'
+import '@/styles/typography.css'
+
+// Import Fonts
+import '@fontsource/jetbrains-mono'
+import '@fontsource/plus-jakarta-sans'
+
+import Header from '@/components/Header.astro'
+import Footer from '@/components/Footer.astro'
+import Head from '@/components/Head.astro'
+import { SITE } from '@/consts'
+import { cn } from '@/lib/utils'
+
+interface Props {
+  class?: string
+  title?: string
+  description?: string
+  image?: string // Baru
+  type?: 'website' | 'article' // Baru
+  publishDate?: Date // Baru
+}
+
+const { 
+  class: className, 
+  title, 
+  description,
+  image,
+  type,
+  publishDate
+} = Astro.props
+---
+
+<!doctype html>
+<html lang={SITE.locale} class="scroll-smooth">
+  <Head 
+    title={title} 
+    description={description}
+    image={image}
+    type={type}
+    publishDate={publishDate}
+  >
+    <slot name="head" />
+  </Head>
+
+  {/* --- THEME SCRIPT (EARLY EXECUTION) --- */}
+  <script is:inline>
+    (function() {
+      const getThemePreference = () => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      };
+      const isDark = getThemePreference() === 'dark';
+      document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    })();
+  </script>
+  
+  <body class="flex h-fit min-h-screen flex-col font-sans bg-background text-foreground antialiased relative selection:bg-yellow-500/30">
+    <div class="fixed inset-0 pointer-events-none z-[1] vignette-layer"></div>
+
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md transition-colors duration-300">
+          <Header /> 
+          <div class="contents [&:not(:empty)]:block [&:not(:empty)]:border-t [&:not(:empty)]:border-border">
+            <slot name="subposts-navigation" />
+            <slot name="table-of-contents" />
+          </div>
+        </header>
+
+    <main class={cn('w-full mx-auto flex grow flex-col gap-y-6 px-4 relative z-10', className)}>
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

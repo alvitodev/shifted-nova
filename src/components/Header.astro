@@ -1,0 +1,75 @@
+---
+import ThemeToggle from '@/components/ThemeToggle.astro' /* IMPORT INI */
+
+const navItems = [
+  { href: '/', label: 'HOME' },
+  { href: '/writing', label: 'WRITING' },
+  { href: '/work', label: 'WORK' },
+  { href: '/notes', label: 'NOTES' }, // 👈 BARU
+  { href: '/feed', label: 'FEED' }, // 👈 BARU
+  { href: '/library', label: 'LIBRARY' }, // 👈 BARU
+  { href: '/gallery', label: 'GALLERY' }, // 👈 BARU
+  { href: '/about', label: 'ABOUT' },
+]
+
+const pathname = Astro.url.pathname
+---
+
+<div
+  class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3"
+>
+  {/* LOGO (Kiri) */}
+  <a href="/" class="group flex items-center gap-2">
+    <div
+      class="relative flex h-6 w-6 items-center justify-center overflow-hidden border border-zinc-400 bg-zinc-200 transition-colors group-hover:border-yellow-500 dark:border-zinc-700 dark:bg-zinc-900"
+    >
+      <span
+        class="dark:group-hover:text-foreground font-mono text-xs font-bold text-yellow-600 group-hover:text-yellow-700 dark:text-yellow-500"
+        >A</span
+      >
+      <div
+        class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-zinc-400 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950"
+      >
+      </div>
+    </div>
+    <span
+      class="dark:group-hover:text-foreground font-mono text-sm font-bold tracking-tighter text-zinc-700 transition-colors group-hover:text-black dark:text-zinc-300"
+    >
+      ALVITO<span class="text-yellow-600 dark:text-yellow-500">.DEV</span>
+    </span>
+  </a>
+
+  {/* NAVIGASI (Kanan) */}
+  <nav class="flex items-center gap-2 sm:gap-4">
+    {
+      navItems.map((item) => {
+        const isActive =
+          item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+        return (
+          <a
+            href={item.href}
+            class={`relative px-3 py-1.5 font-mono text-[10px] tracking-widest transition-all duration-300 sm:text-xs ${
+              isActive
+                ? 'border border-yellow-500/50 bg-yellow-500/10 font-bold text-yellow-600 dark:text-yellow-500'
+                : 'border border-transparent text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-900 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200'
+            } `}
+          >
+            {item.label}
+            {isActive && (
+              <span class="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+            )}
+          </a>
+        )
+      })
+    }
+
+    {/* Divider */}
+    <div class="mx-1 hidden h-4 w-[1px] bg-zinc-300 sm:block dark:bg-zinc-800">
+    </div>
+
+    {/* THEME TOGGLE BUTTON */}
+    <div class="scale-90">
+      <ThemeToggle />
+    </div>
+  </nav>
+</div>

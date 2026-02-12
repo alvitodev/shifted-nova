@@ -1,0 +1,158 @@
+---
+import Panel from '@/components/Panel.astro'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+import { getCollection } from 'astro:content'
+
+// Ambil data library dan urutkan: yang sedang aktif (reading/watching) di atas, sisanya berdasarkan tanggal selesai
+const libraryItems = await getCollection('library')
+
+const sortedLibrary = libraryItems.sort((a, b) => {
+  // Prioritaskan item yang sedang aktif
+  const activeStatuses = ['reading', 'watching', 'playing']
+  const aActive = activeStatuses.includes(a.data.status)
+  const bActive = activeStatuses.includes(b.data.status)
+
+  if (aActive && !bActive) return -1
+  if (!aActive && bActive) return 1
+
+  // Jika sama-sama aktif atau tidak, urutkan berdasarkan tanggal (terbaru di atas)
+  const dateA = a.data.dateFinished?.valueOf() ?? 0
+  const dateB = b.data.dateFinished?.valueOf() ?? 0
+  return dateB - dateA
+})
+
+// Helper untuk ikon tipe media
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case 'book':
+      return 'lucide:book'
+    case 'movie':
+      return 'lucide:film'
+    case 'tv':
+      return 'lucide:tv'
+    case 'game':
+      return 'lucide:gamepad-2'
+    default:
+      return 'lucide:file'
+  }
+}
+
+// Helper untuk warna status
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'finished':
+      return 'text-green-500 border-green-900/50 bg-green-900/10'
+    case 'reading':
+    case 'watching':
+    case 'playing':
+      return 'text-yellow-500 border-yellow-900/50 bg-yellow-900/10 animate-pulse'
+    case 'dropped':
+      return 'text-red-500 border-red-900/50 bg-red-900/10'
+    default:
+      return 'text-zinc-500 border-zinc-800 bg-zinc-900'
+  }
+}
+---
+
+<Layout title="Database // Library">
+  <div class="mx-auto min-h-screen max-w-6xl p-4 md:p-8">
+    {/* --- HEADER TERMINAL --- */}
+    <header class="mt-8 mb-10 border-b border-zinc-800 pb-8">
+      <div class="mb-4 flex items-center gap-3">
+        <div class="h-3 w-3 rounded-sm bg-blue-500"></div>
+        <span class="font-mono text-xs tracking-[0.2em] text-blue-500"
+          >ARCHIVE // MEDIA_LOG</span
+        >
+      </div>
+
+      <h1
+        class="text-foreground mb-2 font-mono text-4xl font-black tracking-tighter uppercase md:text-5xl"
+      >
+        CONSUMPTION_LOGS
+      </h1>
+      <p class="font-mono text-xs text-zinc-500 md:text-sm">
+        &gt; INDEXING_MEDIA_ENTRIES... ({sortedLibrary.length} items)
+      </p>
+    </header>
+
+    {/* --- LIBRARY GRID --- */}
+    {
+      sortedLibrary.length > 0 ? (
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {sortedLibrary.map((item) => (
+            <Panel class="group flex h-full flex-col transition-colors hover:border-blue-500/50">
+              {/* Header Kartu: Type & Status */}
+              <div class="mb-4 flex items-start justify-between">
+                <div class="flex items-center gap-2 font-mono text-xs text-zinc-400">
+                  <Icon name={getTypeIcon(item.data.type)} class="size-4" />
+                  <span class="uppercase">{item.data.type}</span>
+                </div>
+                <span
+                  class={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${getStatusColor(item.data.status)}`}
+                >
+                  {item.data.status}
+                </span>
+              </div>
+
+              {/* Cover Image (Opsional) */}
+              {item.data.coverImage && (
+                <div class="relative mb-4 h-40 w-full overflow-hidden border border-zinc-800 bg-zinc-950">
+                  <img
+                    src={item.data.coverImage}
+                    alt={item.data.title}
+                    class="h-full w-full object-cover opacity-60 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                  {/* Scanline Overlay */}
+                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent opacity-0 group-hover:opacity-100" />
+                </div>
+              )}
+
+              {/* Info Utama */}
+              <div class="flex-grow">
+                <h3 class="mb-1 font-mono text-lg leading-tight font-bold text-zinc-100 transition-colors group-hover:text-blue-400">
+                  {item.data.title}
+                </h3>
+                {item.data.creator && (
+                  <p class="font-mono text-xs text-zinc-500">
+                    By {item.data.creator}
+                  </p>
+                )}
+              </div>
+
+              {/* Footer Kartu: Rating & Date */}
+              <div class="mt-6 flex items-end justify-between border-t border-zinc-800 pt-4">
+                {/* Star Rating Visual */}
+                <div class="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      class={`h-3 w-1.5 rounded-sm ${
+                        i < (item.data.rating || 0)
+                          ? 'bg-blue-500'
+                          : 'bg-zinc-800'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <span class="font-mono text-[10px] text-zinc-600">
+                  {item.data.dateFinished
+                    ? new Date(item.data.dateFinished).toLocaleDateString(
+                        'en-GB',
+                      )
+                    : 'IN_PROGRESS'}
+                </span>
+              </div>
+            </Panel>
+          ))}
+        </div>
+      ) : (
+        /* State Kosong */
+        <div class="flex h-64 flex-col items-center justify-center rounded border border-dashed border-zinc-800 bg-zinc-900/20 font-mono text-zinc-500">
+          <p>// DATABASE_EMPTY</p>
+          <p class="mt-2 text-xs">Add .json entries in src/content/library/</p>
+        </div>
+      )
+    }
+  </div>
+</Layout>

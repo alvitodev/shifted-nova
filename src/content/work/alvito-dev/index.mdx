@@ -1,0 +1,130 @@
+---
+title: "Alvito.dev"
+description: "Membangun rumah digital modern dengan performa tinggi, struktur konten terorganisir, dan estetika Industrial"
+publishDate: 2026-01-21
+heroImage: "https://placehold.co/1200x630/18181b/f59e0b?text=Alvito.dev+System&font=source-code-pro"
+repoLink: "https://github.com/alvitodev/alvitodev.github.io"
+demoLink: "https://alvitodev.github.io"
+techStack: ["Astro", "React", "Tailwind CSS", "TypeScript"]
+tags: ["Web Design", "Personal Branding", "UI/UX", "Documentation"]
+status: "maintained"
+---
+
+import Callout from '@/components/Callout.astro';
+
+## Evolusi Digital
+
+**Alvito.dev** bukan sekadar portofolio statis, melainkan sebuah **"Command Center"** digital yang direkayasa ulang sepenuhnya. Bermula dari halaman HTML manual, situs ini kini telah bertransformasi menjadi aplikasi web modern berbasis **Astro** yang mengutamakan performa, kemudahan pengelolaan (*maintainability*), dan identitas visual yang kuat.
+
+Visi utamanya adalah menciptakan ruang personal yang fleksibel untuk menampung berbagai bentuk ekspresi digital—mulai dari artikel teknis mendalam, catatan harian, portofolio proyek, hingga log aktivitas mikro.
+
+## Arsitektur & Tech Stack
+
+Situs ini dibangun di atas filosofi **"Islands Architecture"** yang dibawa oleh Astro, memungkinkan kita mengirimkan HTML statis murni ke pengguna sambil tetap memiliki komponen interaktif yang kaya di tempat yang diperlukan.
+
+| Teknologi | Peran | Alasan Pemilihan |
+| :--- | :--- | :--- |
+| **Astro** | *Core Framework* | Menghasilkan HTML statis (SSG) secara default demi performa *load* tercepat dan SEO maksimal. JS hanya dikirim jika dibutuhkan (*Zero JS by default*). |
+| **React** | *UI Components* | Digunakan sebagai "Islands" untuk elemen interaktif kompleks seperti *Tab Filters* di halaman Writing, *Image Gallery*, dan *Interactive Widgets*. |
+| **Tailwind CSS** | *Styling Engine* | Memungkinkan pembuatan sistem desain yang konsisten, rigid, dan *utility-first* tanpa meninggalkan file HTML/JSX. |
+| **TypeScript** | *Logic & Safety* | Menjamin integritas data di seluruh aplikasi, terutama untuk memvalidasi *Content Collections* dan props komponen. |
+
+## Desain Sistem: Industrial Cyberpunk
+
+Bahasa visual situs ini mengadopsi gaya **Minimalist Industrial Sci-Fi** (sering disebut juga *Techwear UI* atau *Cassette Futurism* modern).
+
+Kami menghindari estetika "Neon Cyberpunk" yang berlebihan dan beralih ke tampilan yang lebih *matte*, taktis, dan fungsional seperti antarmuka mesin atau sistem operasi militer futuristik.
+
+### DNA Visual
+
+* **Warna Dasar:** `Zinc-950` (Hampir hitam, *matte*). Memberikan kedalaman tanpa kontras yang menyakitkan mata.
+* **Warna Aksen:** `Amber-500` (Jingga Industrial). Digunakan secara hemat untuk *highlight* status, link aktif, atau notifikasi.
+* **Surface:** `Zinc-900` dengan opasitas rendah (*Glassmorphism*) dan *border* tipis (`1px`) untuk memisahkan modul konten.
+* **Tipografi:**
+    * **Judul & Metadata:** *Geist Mono* atau *JetBrains Mono*. Memberikan kesan teknis dan data-driven.
+    * **Konten Artikel:** *Plus Jakarta Sans* atau *Inter*. Mengutamakan keterbacaan (*legibility*) untuk teks panjang.
+
+<Callout type="info">
+Desain ini mengutamakan **Fungsi di atas Bentuk**. Elemen dekoratif seperti *scanlines* atau *grid* hanya digunakan jika mendukung hierarki informasi, bukan sekadar hiasan.
+</Callout>
+
+## Backend: The Super-Schema
+
+Alih-alih menggunakan database SQL/NoSQL yang kompleks, Alvito.dev memanfaatkan kekuatan **Astro Content Collections**. Seluruh konten disimpan sebagai file Markdown (`.md`), MDX (`.mdx`), atau JSON di dalam repositori, namun diperlakukan layaknya database terstruktur dengan validasi skema yang ketat menggunakan **Zod**.
+
+Struktur data ini dibagi menjadi 6 Koleksi Utama:
+
+### 1. Writing (`src/content/writing/`)
+Arsip pemikiran utama.
+* **Tipe:** Artikel panjang, Tutorial, Opini.
+* **Format:** Page Bundles (`judul-artikel/index.mdx`) agar aset gambar terorganisir per artikel.
+* **Fitur:** Mendukung Kategori (*Technical, Opinion, Featured*), *Table of Contents* otomatis, dan *Subposts* (Seri Artikel).
+
+### 2. Work (`src/content/work/`)
+Dokumentasi karya dan eksperimen (Halaman ini adalah salah satu contohnya).
+* **Tipe:** Studi Kasus, Dokumentasi Proyek.
+* **Format:** Page Bundles.
+* **Metadata Khusus:** `techStack` (array teknologi), `repoLink`, `demoLink`, dan `status` (Completed, In-Progress, Maintained).
+
+### 3. Notes (`src/content/notes/`)
+Catatan lapangan yang cepat.
+* **Tipe:** *Today I Learned* (TIL), Snippet Kode, Ide Kasar.
+* **Format:** Single File (`judul-note.md`).
+* **Filosofi:** *Low friction*. Menulis tanpa beban struktur artikel panjang.
+
+### 4. Feed (`src/content/feed/`)
+Jejak digital waktu nyata.
+* **Tipe:** Status update, *Microblogging*.
+* **Format:** Single File berdasarkan tanggal (`YYYY-MM-DD-slug.md`).
+* **Konten:** Bisa berisi teks singkat, embed Spotify, atau foto momen.
+
+### 5. Library (`src/content/library/`)
+Log konsumsi media.
+* **Format:** Data JSON.
+* **Isi:** Daftar buku yang dibaca, film yang ditonton, dan game yang dimainkan beserta *rating* dan statusnya (*Reading, Finished, Dropped*).
+
+### 6. Gallery (`src/content/gallery/`)
+Portofolio fotografi.
+* **Format:** Data JSON.
+* **Isi:** Metadata foto, lokasi pengambilan, dan data EXIF kamera.
+
+## Fitur Unggulan
+
+Situs ini dikembangkan dari basis template *Astro Erudite* yang telah dimodifikasi secara ekstensif:
+
+### MDX Components
+Penulisan konten tidak terbatas pada teks biasa. Kita dapat menyisipkan komponen React/Astro langsung di dalam file Markdown.
+Contohnya adalah komponen `Callout` ini:
+
+```jsx
+<Callout type="warning">
+  Hati-hati, mengubah skema konten bisa menyebabkan error saat build!
+</Callout>
+```
+<Callout type="warning">
+  Hati-hati, mengubah skema konten bisa menyebabkan error saat build!
+</Callout>
+
+### Navigasi Seri (Subposts)
+Situs ini mendukung struktur artikel berseri. Jika sebuah folder artikel memiliki "anak" (sub-artikel), *sidebar* navigasi akan otomatis muncul untuk memudahkan pembaca berpindah antar bab tanpa kehilangan konteks.
+
+### Daftar Isi Cerdas (Sticky TOC)
+Untuk artikel panjang, *Table of Contents* akan di-generate otomatis dari heading artikel. Sidebar ini bersifat *sticky* (mengikuti scroll) dan memiliki indikator aktif untuk menunjukkan bagian mana yang sedang dibaca.
+
+## Workflow Deployment (CI/CD)
+
+Untuk memastikan stabilitas dan kemudahan update, proyek ini menggunakan alur kerja otomatis via **GitHub Actions**:
+
+1.  **Development (`dev` branch):**
+    * Seluruh kode sumber dan konten mentah berada di sini.
+    * Penulisan artikel dan koding dilakukan di branch ini.
+2.  **Build Automation:**
+    * Saat ada *push* ke `dev`, GitHub Actions akan menjalankan `npm run build`.
+    * Proses ini akan memvalidasi seluruh konten (cek error tipe data, link mati, dll).
+3.  **Deployment (`main` branch):**
+    * Jika build sukses, hasil HTML statis (folder `dist/`) akan di-deploy otomatis ke branch `main`.
+    * GitHub Pages menyajikan situs dari branch `main` ini.
+
+---
+
+> *"The code is the documentation, but the documentation makes the code accessible."*

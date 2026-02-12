@@ -1,0 +1,76 @@
+---
+import Panel from '@/components/Panel.astro'
+import Layout from '@/layouts/Layout.astro'
+import { formatDate } from '@/lib/data-utils'
+import { getCollection } from 'astro:content'
+
+// Ambil semua notes, urutkan berdasarkan tanggal terbaru
+const allNotes = await getCollection('notes')
+const recentNotes = allNotes.sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
+)
+---
+
+<Layout title="Database // Notes">
+  <div class="mx-auto min-h-screen max-w-4xl p-4 md:p-8">
+    {/* --- HEADER TERMINAL --- */}
+    <header class="mt-8 mb-12 border-b border-zinc-800 pb-8">
+      <div class="mb-4 flex items-center gap-3">
+        <div class="h-3 w-3 rounded-sm bg-yellow-500"></div>
+        <span class="font-mono text-xs tracking-[0.2em] text-yellow-500"
+          >DATABASE // QUICK_NOTES</span
+        >
+      </div>
+
+      <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div>
+          <h1
+            class="text-foreground mb-2 font-mono text-4xl font-black tracking-tighter uppercase md:text-5xl"
+          >
+            LOG_SNIPPETS
+          </h1>
+          <p class="font-mono text-xs text-zinc-500 md:text-sm">
+            &gt; QUERY_ALL_ENTRIES... ({recentNotes.length} found) <span
+              class="animate-pulse">_</span
+            >
+          </p>
+        </div>
+      </div>
+    </header>
+
+    {/* --- NOTES LIST --- */}
+    {
+      recentNotes.length > 0 ? (
+        <div class="flex flex-col gap-4">
+          {recentNotes.map((note) => (
+            <Panel class="p-4 transition-colors duration-300 hover:border-yellow-500/50">
+              <a href={`/notes/${note.id}`} class="group block">
+                <div class="flex items-start justify-between font-mono">
+                  <h2 class="text-lg font-bold text-zinc-200 transition-colors group-hover:text-yellow-500">
+                    {note.data.title}
+                  </h2>
+                  <span class="pt-1 text-xs whitespace-nowrap text-zinc-600">
+                    {formatDate(note.data.publishDate)}
+                  </span>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  {(note.data.tags ?? []).map((tag) => (
+                    <span class="rounded border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] text-zinc-500 uppercase">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </a>
+            </Panel>
+          ))}
+        </div>
+      ) : (
+        /* State Kosong */
+        <div class="flex h-64 flex-col items-center justify-center rounded border border-dashed border-zinc-800 bg-zinc-900/20 font-mono text-zinc-500">
+          <p>// NO_NOTES_FOUND</p>
+          <p class="mt-2 text-xs">Create files in src/content/notes/</p>
+        </div>
+      )
+    }
+  </div>
+</Layout>

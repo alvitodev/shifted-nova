@@ -1,0 +1,306 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PostNavigation from '@/components/PostNavigation.astro'
+import SubpostsHeader from '@/components/SubpostsHeader.astro'
+import SubpostsSidebar from '@/components/SubpostsSidebar.astro'
+import TOCHeader from '@/components/TOCHeader.astro'
+import TOCSidebar from '@/components/TOCSidebar.astro'
+import { badgeVariants } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import {
+  getAdjacentPosts,
+  getAllPostsAndSubposts,
+  getCombinedReadingTime,
+  getParentId,
+  getParentPost,
+  getPostReadingTime,
+  getSubpostCount,
+  getTOCSections,
+  hasSubposts,
+  isSubpost,
+} from '@/lib/data-utils'
+import { formatDate } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import { render } from 'astro:content'
+
+// 1. Ambil data (Logika tetap dipertahankan)
+export async function getStaticPaths() {
+  const posts = await getAllPostsAndSubposts()
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: post,
+  }))
+}
+
+const post = Astro.props
+const currentPostId = Astro.params.id
+const { Content, headings } = await render(post)
+// parseAuthors akan return [] (aman), jadi logika authors di bawah tidak akan render apa2
+// const authors = [];
+
+const isCurrentSubpost = isSubpost(currentPostId)
+const navigation = await getAdjacentPosts(currentPostId)
+const parentPost = isCurrentSubpost ? await getParentPost(currentPostId) : null
+
+const hasChildPosts = await hasSubposts(currentPostId)
+const subpostCount = !isCurrentSubpost
+  ? await getSubpostCount(currentPostId)
+  : 0
+const postReadingTime = await getPostReadingTime(currentPostId)
+const combinedReadingTime =
+  hasChildPosts && !isCurrentSubpost
+    ? await getCombinedReadingTime(currentPostId)
+    : null
+
+const tocSections = await getTOCSections(currentPostId)
+---
+
+<Layout 
+  title={post.data.title} 
+  description={post.data.description}
+  image={post.data.heroImage?.src}
+  type="article"
+  publishDate={post.data.publishDate}
+>
+  
+  {/* Slot Navigasi Subpost Mobile */}
+  {
+    (hasChildPosts || isCurrentSubpost) && (
+      <SubpostsHeader
+        slot="subposts-navigation"
+        parentId={isCurrentSubpost ? getParentId(currentPostId) : currentPostId}
+      />
+    )
+  }
+  
+  {/* Slot TOC Header Mobile */}
+  {
+    headings?.length > 0 &&
+      !(
+        isCurrentSubpost &&
+        headings.length === 1 &&
+        headings[0].text === post.data.title
+      ) && <TOCHeader slot="table-of-contents" headings={headings} />
+  }
+
+  {/* GRID UTAMA - DIPERTAHANKAN */}
+  <section
+    class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6 lg:gap-y-8"
+  >
+    {/* Breadcrumbs */}
+    <div class="col-start-2 pt-6">
+      <Breadcrumbs
+        items={[
+          { href: '/writing', label: 'Writing', icon: 'lucide:terminal' }, /* FIX: /blog -> /writing */
+          ...(isCurrentSubpost && parentPost
+            ? [
+                {
+                  href: `/writing/${parentPost.id}`, /* FIX: URL */
+                  label: parentPost.data.title,
+                  icon: 'lucide:book-open',
+                },
+                {
+                  href: `/writing/${currentPostId}`, /* FIX: URL */
+                  label: post.data.title,
+                  icon: 'lucide:file-text',
+                },
+              ]
+            : [
+                {
+                  href: `/writing/${currentPostId}`, /* FIX: URL */
+                  label: post.data.title,
+                  icon: 'lucide:book-open-text',
+                },
+              ]),
+        ]}
+      />
+    </div>
+
+    {/* Hero Image (Updated to use heroImage) */}
+    {
+      post.data.heroImage && (
+        <div class="col-span-full mx-auto w-full max-w-5xl border-y border-border bg-muted/50">
+            <Image
+            src={post.data.heroImage}
+            alt={post.data.title}
+            width={1200}
+            height={630}
+            class="w-full object-cover max-h-[500px] opacity-90"
+            />
+        </div>
+      )
+    }
+
+    {/* Header Section (Title, Meta) */}
+    <section class="col-start-2 flex flex-col gap-y-6 text-center pt-2">
+      <div class="flex flex-col">
+        <h1
+          class="mb-4 scroll-mt-31 text-3xl font-bold font-mono tracking-tight sm:text-5xl text-foreground"
+          id="post-title"
+        >
+          {post.data.title}
+        </h1>
+
+        <div
+          class="text-muted-foreground divide-border mb-6 flex flex-col items-center justify-center divide-y text-xs font-mono sm:flex-row sm:flex-wrap sm:divide-x sm:divide-y-0"
+        >
+          {/* Authors (Logic kept, but will be empty for now) */}
+          <!-- {
+            authors.length > 0 && (
+              <div class="flex w-full items-center justify-center gap-x-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
+                {authors.map((author) => (
+                  <div class="flex items-center gap-x-1.5">
+                    {/* ... author logic ... */}
+                    <span>{author.name}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          } -->
+
+          {/* Date (Updated field) */}
+          <div
+            class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0 text-yellow-500"
+          >
+            <Icon name="lucide:calendar" class="size-3" />
+            <span>{formatDate(post.data.publishDate)}</span> /* FIX: date -> publishDate */
+          </div>
+
+          {/* Reading Time */}
+          <div
+            class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0"
+          >
+            <span>
+              {postReadingTime}
+              {
+                combinedReadingTime &&
+                  combinedReadingTime !== postReadingTime && (
+                    <span class="text-muted-foreground">
+                      {' '}
+                      ({combinedReadingTime} total)
+                    </span>
+                  )
+              }
+            </span>
+          </div>
+
+          {/* Subposts Count */}
+          {
+            subpostCount > 0 && (
+              <div class="flex w-full items-center justify-center gap-1 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
+                <Icon name="lucide:layers" class="size-3" />
+                {subpostCount} subpost{subpostCount === 1 ? '' : 's'}
+              </div>
+            )
+          }
+        </div>
+
+        {/* Tags */}
+        <div class="flex flex-wrap justify-center gap-2">
+          {
+            (post.data.tags ?? []).map((tag) => (
+                <span
+                  class={badgeVariants({ variant: 'outline' }) + " font-mono text-xs border-border text-muted-foreground"}
+                >
+                  <Icon name="lucide:hash" class="size-3 mr-1" />
+                  {tag}
+                </span>
+              ))
+          }
+        </div>
+      </div>
+
+      <PostNavigation
+        newerPost={navigation.newer}
+        olderPost={navigation.older}
+        parentPost={isCurrentSubpost ? navigation.parent : undefined}
+      />
+    </section>
+
+    {/* Sidebar TOC Desktop */}
+    {
+      tocSections.length > 0 && (
+        <TOCSidebar sections={tocSections} currentPostId={currentPostId} />
+      )
+    }
+
+    {/* ARTIKEL KONTEN */}
+    <article class="prose dark:prose-invert prose-zinc col-start-2 max-w-none prose-headings:font-mono prose-headings:tracking-tight prose-a:text-yellow-600 dark:prose-a:text-yellow-500 prose-code:text-yellow-600 dark:prose-code:text-yellow-300 prose-pre:border prose-pre:border-border prose-pre:bg-muted/50">
+      <Content />
+    </article>
+
+    {/* Sidebar Subposts Desktop */}
+    {
+      (hasChildPosts || isCurrentSubpost) && (
+        <SubpostsSidebar
+          parentId={
+            isCurrentSubpost ? getParentId(currentPostId) : currentPostId
+          }
+          className="w-64"
+        />
+      )
+    }
+
+    {/* Footer Navigation */}
+    <div class="col-start-2 pb-12">
+        <PostNavigation
+        newerPost={navigation.newer}
+        olderPost={navigation.older}
+        parentPost={isCurrentSubpost ? navigation.parent : undefined}
+        />
+    </div>
+  </section>
+
+  {/* Scroll to Top Button */}
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed right-8 bottom-8 z-50 hidden bg-background border-border hover:border-yellow-500"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon
+      name="lucide:arrow-up"
+      class="mx-auto size-4 transition-all group-hover:-translate-y-0.5 text-muted-foreground group-hover:text-yellow-500"
+    />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+
+          scrollToTopButton.classList.toggle(
+            'hidden',
+            window.scrollY <= 300 || isFooterVisible,
+          )
+        })
+      }
+    })
+  </script>
+</Layout>
+
+<script>
+  // KaTeX Logic (Matematika)
+  if (document.querySelector('.katex')) {
+    if (!document.querySelector('link[href*="katex.min.css"]')) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href =
+        'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css'
+      document.head.appendChild(link)
+    }
+  }
+</script>

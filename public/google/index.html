@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./img/gemini.png" type="image/x-icon" />
+    <title>Klaim Google AI Pro untuk Pelajar</title>
+    <meta property="og:title" content="Gemini untuk Mahaiswa — dapatkan Google AI Pro gratis selama setahun" />
+    <meta property="og:image" content="https://lh3.googleusercontent.com/aVS8G0jtuvPusT3egMdjd5XXTCXd0GyjdnBVUW-mi1x3gGfaNqtJVLi0sw_n71_UA-nBB1vQXVmtXQldf5Aj054zp61ouawFMUg=e365-pa-nu-w1200" />
+    <meta property="og:description" content="Nikmati manfaat lebih banyak dari Gemini dengan Google AI Pro gratis selama setahun dan manfaatkan kecanggihan Gemini bagi berbagai urusan kuliah, mulai dari mendapatkan bantuan mengerjakan tugas sekolah hingga pembuatan video." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "Google Sans";
+        src: url("https://raw.githubusercontent.com/hprobotic/Google-Sans-Font/refs/heads/master/GoogleSans-Regular.ttf")
+          format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Google Sans";
+        src: url("https://raw.githubusercontent.com/hprobotic/Google-Sans-Font/refs/heads/master/GoogleSans-Bold.ttf")
+          format("truetype");
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      body {
+        font-family: "Google Sans", sans-serif;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-in-out forwards;
+      }
+      #image-popup.hidden {
+        display: none;
+      }
+      details > summary {
+        list-style: none;
+      }
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+      .chevron {
+        transition: transform 0.3s ease-in-out;
+      }
+      details[open] summary .chevron {
+        transform: rotate(180deg);
+      }
+      .faq-content {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s ease-in-out;
+      }
+      details[open] > .faq-content {
+        grid-template-rows: 1fr;
+      }
+      .faq-content > div {
+        overflow: hidden;
+      }
+      .stagger-1 {
+        animation-delay: 100ms;
+      }
+      .stagger-2 {
+        animation-delay: 200ms;
+      }
+      .stagger-3 {
+        animation-delay: 300ms;
+      }
+      .stagger-4 {
+        animation-delay: 400ms;
+      }
+      .stagger-5 {
+        animation-delay: 500ms;
+      }
+    </style>
+  
+  </head>
+  <body class="bg-white text-gray-800 flex flex-col min-h-screen">
+    <script>
+  function openInExternalBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isAndroid = /android/i.test(userAgent);
+    const isInstagram = /Instagram/.test(userAgent);
+    // Cek untuk Telegram tidak diperlukan di sini karena fungsinya sama
+
+    // Hanya jalankan intent untuk Android, karena iOS tidak mendukungnya
+    if (isAndroid) {
+      const fullUrl = 'https://alvito.dev/google';
+      const urlWithoutProtocol = fullUrl.replace(/^https?:\/\//, '');
+      window.location.href = 'intent://' + urlWithoutProtocol + '#Intent;scheme=https;package=com.android.chrome;end';
+    }
+    
+    // Sembunyikan popup setelah tombol diklik
+    document.getElementById('inapp-popup').style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isInstagram = /Instagram/.test(userAgent);
+    const isTelegram = /Telegram/.test(userAgent); // <-- BARIS BARU
+
+    // Tampilkan popup jika dibuka di Instagram ATAU Telegram
+    if (isInstagram || isTelegram) {
+      // Add Google Fonts for icons
+      const fontLink = document.createElement('link');
+      fontLink.rel = 'stylesheet';
+      fontLink.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0';
+      document.head.appendChild(fontLink);
+
+      const popupHTML = `
+      <div id="inapp-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 1000; display: flex; justify-content: center; align-items: center; font-family: 'Google Sans', sans-serif;">
+        <div style="background-color: #2d2d2d; color: white; padding: 24px; border-radius: 16px; text-align: center; max-width: 90%; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #444;">
+          <h3 style="font-size: 1.3rem; font-weight: 600;">Eits, buka di browser luar dulu ya!</h3>
+          <p style="color: #e5e5e5; margin-top: 16px; font-size: 1rem; line-height: 1.6;">
+            Biar gampang login pake akun Google-mu, klik ikon titik tiga
+            <span class="material-symbols-outlined" style="font-size: 1.4rem; vertical-align: middle; display: inline-block; margin: 0 2px; transform: translateY(-2px);">more_horiz</span>
+            di pojok kanan atas, terus pilih "Buka di Browser".
+          </p>
+          <img src="img/userios.jpg" alt="Instruksi" style="width: 100%; max-width: 300px; margin: 20px auto; border-radius: 8px; border: 1px solid #555;">
+          <button onclick="openInExternalBrowser()" style="display: block; width: 100%; background-color: #3b82f6; color: white; padding: 14px 20px; border-radius: 8px; text-decoration: none; margin-top: 16px; border: none; cursor: pointer; font-weight: 600; font-size: 1.1rem;">
+            Oke, Ngerti!
+          </button>
+        </div>
+      </div>`;
+      
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+      document.getElementById('inapp-popup').style.display = 'flex';
+    }
+  });
+</script>
+    <header
+      class="w-full px-4 sm:px-8 py-3 border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-40"
+    >
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="#" title="Beranda">
+          <img
+            src="./img/geminitext.png"
+            alt=""
+            srcset=""
+            width="120"
+            height="40"
+          />
+        </a>
+        <a
+          class="claim-button hidden md:inline-flex items-center gap-2 bg-blue-600 text-white font-semibold py-2 px-5 rounded-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out"
+        >
+          Klaim Sekarang
+        </a>
+      </div>
+    </header>
+
+    <main class="flex-grow">
+      <section class="text-center px-4 pt-20 pb-12 relative">
+    
+        <div class="absolute inset-0 bg-[#f8fafc] opacity-50">
+          <div
+            class="absolute inset-0"
+            style="
+              background-image: linear-gradient(#e2e8f0 1px, transparent 1px),
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px);
+              background-size: 20px 20px;
+            "
+          ></div>
+        </div>
+
+        <div class="relative max-w-2xl mx-auto">
+          <h1
+            class="text-4xl md:text-5xl font-bold text-gray-800 mb-3 animate-fade-in-up"
+            style="opacity: 0"
+          >
+            Permudah aktivitas kuliah Kamu dengan  <span class="text-blue-600">Google AI Pro</span> Gratis!
+          </h1>
+          <p
+            class="text-lg text-gray-600 mb-8 animate-fade-in-up stagger-1"
+            style="opacity: 0"
+          >
+            Persiapkan diri untuk mengikuti ujian, sempurnakan tulisan Anda, dan selesaikan tugas dengan fitur terbaik AI Google, termasuk akses terbatas ke fitur pembuatan video dengan Veo 3 Fast.
+          </p>
+          <div
+            class="flex flex-wrap items-center justify-center gap-4 animate-fade-in-up stagger-2"
+            style="opacity: 0"
+          >
+            <a
+              class="claim-button inline-flex items-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+            >
+              Klaim Sekarang
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                ></path>
+              </svg>
+            </a>
+            <a
+              href="#faq"
+              class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-full shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 ease-in-out"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.846-1.255 3.443-3 3.872v1.128M12 18h.01"
+                ></path>
+              </svg>
+              FAQ
+            </a>
+          </div>
+          <p
+            class="text-xs text-gray-500 mt-4 animate-fade-in-up stagger-3"
+            style="opacity: 0"
+          >
+            No scam scam ya guys ya😜, link mengarah langsung ke situs resmi
+            Google
+          </p>
+        </div>
+      </section>
+
+      <section id="langkah" class="pt-10 w-full max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <div class="flex justify-center mb-6">
+            <video autoplay loop muted playsinline class="w-16 h-16">
+              <source
+                src="https://storage.googleapis.com/gweb-gemini-cdn/gemini/uploads/a21a64fe0131928e76bc9924aed2da8fccd5dfad.mp4"
+                type="video/mp4"
+              />
+            </video>
+          </div>
+          <h2 class="text-2xl text-gray-700 font-semibold">
+            Gimana sih cara klaimnya? 🤔
+          </h2>
+          <p class="text-xs text-gray-500 mt-2">
+            *Klik gambar untuk memperbesar
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-3"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              1
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (7).png"
+                alt="Step 1"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">1. Klik klaim sekarang diatas</h3>
+            <p class="text-gray-500">
+              Kamu bakal diarahkan ke halaman Google One, lanjut klik Verifikasi Kelayakan.
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-4"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              2
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (6).png"
+                alt="Step 2"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">2. Isi Identitas Dirimu</h3>
+            <p class="text-gray-500">
+              Isi sesuai data diri kamu, terutama kamu berasal dari perguruan tinggi mana. Lalu isi gmail aktif kamu yang ingin diupgrade.
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-5"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              3
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (5).png"
+                alt="Step 3"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">3. Login akun akademik jika ada</h3>
+            <p class="text-gray-500">
+              Sistem akan mengarahkanmu ke halaman login SSO kampusmu, silakan login dengan akun akademikmu seperti student.uny.ac.id
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-6"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              4
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (4).png"
+                alt="Step 4"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">4. Pilih akun akademik kamu.</h3>
+            <p class="text-gray-500">
+              Pilih akun akademik kamu.
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-7"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              5
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (3).png"
+                alt="Step 5"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">5. Verifikasi kredensial akademikmu</h3>
+            <p class="text-gray-500">
+              Unggah data bukti pendaftaranmu sebagai mahasiswa aktif, misalnya Kartu Tanda Mahasiswa (KTM) atau KRS dari kampusmu.
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-8"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              6
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (2).png"
+                alt="Step 6"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">6. Upload bukti pendaftaran</h3>
+            <p class="text-gray-500">
+              Upload dokumen pendukung yang valid untuk verifikasi. Baca panduan yang tersedia. 
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-9"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              7
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ss (0).png"
+                alt="Step 7"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">7. Tunggu verifikasi selesai</h3>
+            <p class="text-gray-500">
+              Tunggu verifikasi selesai, biasanya memakan waktu beberapa menit hingga jam. Cek email secara berkala untuk notifikasi.
+            </p>
+          </div>
+
+          <div
+            class="relative bg-gray-50 p-6 pt-10 rounded-xl border border-gray-200 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 ease-in-out animate-fade-in-up stagger-10"
+            style="opacity: 0"
+          >
+            <div
+              class="absolute top-0 left-0 -mt-5 -ml-3 flex items-center justify-center w-12 h-12 bg-blue-600 text-white font-bold rounded-full border-4 border-white"
+            >
+              8
+            </div>
+            <div
+              class="popup-trigger flex justify-center items-center mb-4 h-48 bg-gray-200 rounded-lg cursor-pointer overflow-hidden"
+            >
+              <img
+                src="./img/ssbayar.jpg"
+                alt="Step 8"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">8. Klik Langganan</h3>
+            <p class="text-gray-500">
+              <strong>Tenang,</strong> disini kamu tidak akan dikenakan biaya apapun, karena memang ini gratis. Namun Google tetap meminta metode pembayaran untuk berjaga-jaga jika kamu ingin berlangganan setelah masa trial habis. Google bakal email kamu jika masa trial akan habis. Paling aman pake e-wallet seperti GOPAY, OVO, DANA, atau LinkAja.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Add this congratulatory message after the grid of steps -->
+      <div class="text-center mt-12 mb-8 animate-fade-in-up">
+        <h3 class="text-2xl font-semibold text-blue-600">
+          Selamat! Kamu berhasil upgrade Google kamu menjadi Pro secara gratis! 🎉
+        </h3>
+      </div>
+    </section>
+
+    <section id="faq" class="mt-20 pt-10 w-full max-w-3xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-8">
+          Pertanyaan Umum (FAQ)
+        </h2>
+        <div class="space-y-4">
+          <div class="bg-gray-50 border border-gray-200 rounded-lg">
+            <details class="p-4 group">
+              <summary
+                class="font-semibold cursor-pointer flex justify-between items-center"
+              >
+                Saat mencoba upgrade ke Gemini Pro, saya mendapatkan pesan
+                error: "Melebihi Batas Verifikasi", bagaimana mengatasinya?
+                <svg
+                  class="w-5 h-5 chevron transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </summary>
+              <div class="faq-content">
+                <div>
+                  <div class="pt-3 text-gray-600 text-left space-y-2">
+                    <p>
+                      Mohon pastikan bahwa akun yang digunakan adalah akun yang
+                      belum upgrade ke Google AI Pro.
+                    </p>
+                    <ul class="list-disc pl-5 space-y-2">
+                      <li>
+                        Jika akun yang digunakan sudah upgrade dengan penawaran
+                        mahasiswa/i sebelumnya, maka tidak bisa di-upgrade
+                        berulang.
+                      </li>
+                      <li>
+                        Jika akun yang digunakan sudah upgrade sebagai user
+                        regular (trial 1 bulan), maka perlu dibatalkan/cancel
+                        upgrade dan menunggu sampai trialnya berakhir untuk
+                        upgrade kembali.
+                      </li>
+                    </ul>
+                    <p>
+                      Jika sebelumnya pernah mencoba upgrade namun gagal, mohon
+                      pastikan:
+                    </p>
+                    <ul class="list-disc pl-5 space-y-2">
+                      <li>
+                        Dokumen yang diupload (misalnya KTM) memuat tanggal
+                        berlaku di tahun 2025 ini.
+                      </li>
+                      <li>
+                        Jika KTM tidak memuat masa berakhir, maka gunakan
+                        kombinasi KTM dengan dokumen lain (misalnya FRS /
+                        Print-out Sistem Akademik yang bertanggal) dalam 1 PDF
+                      </li>
+                    </ul>
+                    <p>
+                      Verifikasi dilakukan oleh layanan
+                      <a
+                        href="https://www.sheerid.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-600 hover:underline"
+                      >
+                        SheerID
+                      </a>
+                      (informasi). Dokumen yang dapat digunakan untuk verifikasi
+                      dapat dilihat pada
+                      <a
+                        href="https://www.sheerid.com/supported-documents/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-600 hover:underline"
+                      >
+                        link SheerID berikut
+                      </a>
+                      .
+                    </p>
+                    <p>
+                      Jika mengalami kendala terkait verifikasi, silakan
+                      mengirimkan email ke
+                      <a
+                        href="mailto:customerservice@sheerid.com"
+                        class="text-blue-600 hover:underline"
+                      >
+                        customerservice@sheerid.com
+                      </a>
+                      (layanan hanya tersedia dalam Bahasa Inggris).
+                    </p>
+                    <p>
+                      Proses Upgrade juga mungkin gagal jika akun Gmail yang
+                      Anda gunakan merupakan anggota dari sebuah Grup Keluarga
+                      (Family group members) di Google. Gunakan akun gmail lain
+                      yang independen dan tidak terdaftar sebagai anggota grup
+                      keluarga.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg">
+            <details class="p-4 group">
+              <summary
+                class="font-semibold cursor-pointer flex justify-between items-center"
+              >
+                Saat mencoba upgrade ke Gemini Pro, saya mendapatkan pesan error
+                terkait pembayaran, bagaimana mengatasinya?
+                <svg
+                  class="w-5 h-5 chevron transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </summary>
+              <div class="faq-content">
+                <div>
+                  <div class="pt-3 text-gray-600 text-left space-y-2">
+                    <p>
+                      Pastikan metode pembayaran yang Anda input valid, dan
+                      untuk kartu debit/kredit/e-wallet telah diaktifkan untuk
+                      transaksi online.
+                    </p>
+                    <p>
+                      Jika opsi e-wallet tidak muncul, silakan ke
+                      <a
+                        href="https://play.google.com/store/paymentmethods"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-600 hover:underline"
+                      >
+                        https://play.google.com/store/paymentmethods
+                      </a>
+                      untuk menambahkan secara manual sebelum mencoba kembali.
+                    </p>
+                    <p>
+                      Anda juga dianjurkan memiliki saldo sekitar Rp 20.000
+                      untuk verifikasi.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg">
+            <details class="p-4 group">
+              <summary
+                class="font-semibold cursor-pointer flex justify-between items-center"
+              >
+                Apakah di bulan ke-13 mahasiswa/i yang upgrade ini akan membayar
+                langganan Google AI Pro?
+                <svg
+                  class="w-5 h-5 chevron transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </summary>
+              <div class="faq-content">
+                <div>
+                  <div class="pt-3 text-gray-600 text-left">
+                    <p>
+                      Ya, sesuai dengan layar pembayaran, Anda akan ditagihkan
+                      biaya pada bulan ke-12 dan selanjutnya ke metode
+                      pembayaran yang dipilih.
+                    </p>
+                    <p>
+                      Untuk menghindari pembayaran tersebut, Anda dapat
+                      membatalkan trial sebelum batas waktu trial habis, dan
+                      trial Anda akan tetap aktif hingga 12 bulan sejak aktivasi
+                      pertama.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg">
+            <details class="p-4 group">
+              <summary
+                class="font-semibold cursor-pointer flex justify-between items-center"
+              >
+                Ada apa dengan penawaran untuk mahasiswa sebelumnya?
+                <svg
+                  class="w-5 h-5 chevron transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </summary>
+              <div class="faq-content">
+                <div>
+                  <div class="pt-3 text-gray-600 text-left">
+                    <p>
+                      Penawaran untuk mahasiswa selama 15 bulan dari kami telah
+                      berakhir pada 30 Juni 2025 dan tidak lagi tersedia di
+                      wilayahmu. Kamu masih bisa menikmati uji coba Google AI
+                      Pro selama 1 bulan dan mendapatkan akses lebih luas ke
+                      aplikasi Gemini, NotebookLM, serta penyimpanan gratis
+                      sebesar 2 TB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="bg-gray-50 border border-gray-200 rounded-lg">
+            <details class="p-4 group">
+              <summary
+                class="font-semibold cursor-pointer flex justify-between items-center"
+              >
+                Bagaimana jika saya lupa membatalkan layanan sebelum masa trial
+                berakhir?
+                <svg
+                  class="w-5 h-5 chevron transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </summary>
+              <div class="faq-content">
+                <div>
+                  <div class="pt-3 text-gray-600 text-left">
+                    <p>
+                      Kami akan mengirimkan email terlebih dahulu untuk
+                      mengingatkan bahwa penawaran Anda segera berakhir,
+                      sehingga Anda punya banyak waktu untuk membatalkan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="w-full text-center mt-20 py-16 bg-gray-100">
+        <div class="max-w-2xl mx-auto px-4">
+          <h2 class="text-3xl font-bold mb-4">Siap untuk Memulai?</h2>
+          <p class="text-gray-600 mb-8">
+            Jangan lewatkan kesempatan ini. Klaim akses Google AI Pro Anda
+            sekarang juga.
+          </p>
+          <a
+            class="claim-button inline-flex items-center gap-2 bg-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+          >
+            Klaim Sekarang
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              ></path>
+            </svg>
+          </a>
+          <p class="text-sm text-gray-600 mt-4">
+            Kalau bingung, bisa tanya langsung via WhatsApp:
+            <a
+              href="https://wa.me/6287832438314"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-semibold underline hover:text-green-600 transition-colors"
+            >
+              +62 878-3243-8314
+            </a>
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="w-full py-8 border-t border-gray-200 bg-gray-50">
+      <div class="max-w-7xl mx-auto text-center text-sm text-gray-500 px-4">
+        <div class="flex justify-center mb-2">
+          <img
+            src="./img/geminitext.png"
+            alt=""
+            srcset=""
+            width="120"
+            height="40"
+          />
+        </div>
+        <p class="mb-2">&copy; 2025 Google LLC | Made with 💖 by @alvitodev</p>
+        <div class="space-x-4">
+          <a href="#" class="hover:underline">Privasi</a>
+          <a href="#" class="hover:underline">Persyaratan</a>
+          <a href="#" class="hover:underline">Tentang Google</a>
+        </div>
+      </div>
+    </footer>
+
+    
+
+    <div
+      id="image-popup"
+      class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-in-out"
+    >
+      <div
+        id="popup-content-wrapper"
+        class="relative bg-white p-4 rounded-lg shadow-xl max-w-3xl w-full transform transition-transform duration-300 ease-in-out scale-95"
+      >
+        <div id="popup-content" class="w-full h-full"></div>
+        <button
+          id="close-popup"
+          class="absolute -top-4 -right-4 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-600 focus:outline-none"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const popup = document.getElementById("image-popup");
+        const popupContent = document.getElementById("popup-content");
+        const popupContentWrapper = document.getElementById(
+          "popup-content-wrapper"
+        );
+        const closeButton = document.getElementById("close-popup");
+        const triggers = document.querySelectorAll(".popup-trigger");
+
+        function showPopup(content) {
+          popupContent.innerHTML = content;
+          popup.classList.remove("hidden");
+          setTimeout(() => {
+            popup.classList.add("opacity-100");
+            popupContentWrapper.classList.add("scale-100");
+          }, 10);
+        }
+
+        function hidePopup() {
+          popup.classList.remove("opacity-100");
+          popupContentWrapper.classList.remove("scale-100");
+          setTimeout(() => {
+            popup.classList.add("hidden");
+            popupContent.innerHTML = "";
+          }, 300);
+        }
+
+        triggers.forEach((trigger) => {
+          trigger.addEventListener("click", () => {
+            const content = trigger.innerHTML;
+            showPopup(content);
+          });
+        });
+
+        closeButton.addEventListener("click", hidePopup);
+
+        popup.addEventListener("click", (e) => {
+          if (e.target === popup) {
+            hidePopup();
+          }
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !popup.classList.contains("hidden")) {
+            hidePopup();
+          }
+        });
+      });
+
+      function handleClaimClick(e) {
+        e.preventDefault();
+        const cleanUrl =
+          "https://one.google.com/ai-student?utm_source=gemini&utm_medium=organic&utm_campaign=students_college-inc_campus-ambassador-id-292";
+        window.location.replace(cleanUrl); 
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+     
+        const claimButtons = document.querySelectorAll(".claim-button");
+
+        claimButtons.forEach((button) => {
+          button.addEventListener("click", handleClaimClick);
+
+    
+          button.addEventListener("mouseover", (e) => {
+            e.preventDefault();
+          });
+
+
+          button.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
