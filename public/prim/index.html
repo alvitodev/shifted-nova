@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LPG-3T Optimizer: Prim Interactive Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+      body {
+        font-family: 'JetBrains+Mono', monospace;
+        background-color: #0f172a;
+        color: #e2e8f0;
+      }
+      .node {
+        stroke: #1e293b;
+        stroke-width: 2px;
+        transition: all 0.3s;
+      }
+      .link {
+        stroke-opacity: 0.2;
+        stroke-width: 1px;
+        transition: all 0.3s;
+      }
+      .mst-link {
+        stroke: #2dd4bf;
+        stroke-opacity: 1;
+        stroke-width: 4px;
+        stroke-dasharray: 1000;
+        animation: draw 1s ease-out forwards;
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .highlight-node {
+        stroke: #2dd4bf;
+        stroke-width: 4px;
+        filter: drop-shadow(0 0 8px #2dd4bf);
+      }
+      input[type='range'] {
+        accent-color: #2dd4bf;
+      }
+    </style>
+  </head>
+  <body class="p-4 md:p-8">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8 border-b border-slate-700 pb-4">
+        <h1 class="text-3xl font-bold text-teal-400">
+          LPG-3T Optimizer
+          <span class="text-lg font-normal text-slate-500">v1.0</span>
+        </h1>
+        <p class="mt-2 text-slate-400">
+          Simulasi Algoritma Prim dengan Bobot Komposit Multidimensi untuk
+          Wilayah 3T.
+        </p>
+      </header>
+
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
+        <div
+          class="space-y-6 rounded-xl border border-slate-700 bg-slate-800/50 p-6 lg:col-span-1"
+        >
+          <div>
+            <h2
+              class="mb-4 text-sm font-bold tracking-wider text-teal-500 uppercase"
+            >
+              Parameter Bobot
+            </h2>
+            <div class="space-y-4">
+              <div>
+                <label class="mb-1 flex justify-between text-xs"
+                  ><span>Alpha (Jarak)</span
+                  ><span id="v-alpha">0.5</span></label
+                >
+                <input
+                  type="range"
+                  id="alpha"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0.5"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="mb-1 flex justify-between text-xs"
+                  ><span>Beta (Akses)</span><span id="v-beta">0.3</span></label
+                >
+                <input
+                  type="range"
+                  id="beta"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0.3"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="mb-1 flex justify-between text-xs"
+                  ><span>Gamma (LPG)</span><span id="v-gamma">0.2</span></label
+                >
+                <input
+                  type="range"
+                  id="gamma"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0.2"
+                  class="w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 border-t border-slate-700 pt-4">
+            <button
+              id="btn-next"
+              class="w-full rounded bg-teal-600 py-2 font-bold text-white transition hover:bg-teal-500"
+            >
+              Next Step
+            </button>
+            <button
+              id="btn-reset"
+              class="w-full rounded bg-slate-700 py-2 text-slate-300 transition hover:bg-slate-600"
+            >
+              Reset
+            </button>
+          </div>
+
+          <div
+            class="border-t border-slate-700 pt-4 text-xs text-slate-400 italic"
+          >
+            W(u,v) = α·J + β·IA + γ·(100/P)
+          </div>
+        </div>
+
+        <div
+          class="relative h-[600px] overflow-hidden rounded-xl border border-slate-700 bg-slate-900 lg:col-span-3"
+        >
+          <div id="canvas-container" class="h-full w-full"></div>
+
+          <div
+            class="absolute right-4 bottom-4 rounded border border-slate-600 bg-slate-800/80 p-4 backdrop-blur-sm"
+          >
+            <h3 class="mb-2 text-xs font-bold text-teal-400 uppercase">
+              Status MST
+            </h3>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+              <span class="text-slate-500">Sisi Terpilih:</span>
+              <span id="stat-edges">0/9</span>
+              <span class="text-slate-500">Total Bobot:</span>
+              <span id="stat-weight">0.00</span>
+              <span class="text-slate-500">Iterasi:</span>
+              <span id="stat-iter">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="mt-8 h-32 overflow-y-auto rounded border border-slate-700 bg-slate-800/30 p-4 text-xs"
+        id="log"
+      >
+        <div class="text-teal-500">
+          [System] Menunggu inisialisasi... Klik 'Next Step' untuk memulai dari
+          S1.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Data Nodes & Edges berdasarkan PPT Kelompok 3 [cite: 134-138, 206-250]
+      const nodes = [
+        { id: 'S1', type: 'Pusat', p: 0 },
+        { id: 'P1', type: 'Pangkalan', p: 250 },
+        { id: 'P2', type: 'Pangkalan', p: 300 },
+        { id: 'P3', type: 'Pangkalan', p: 280 },
+        { id: 'W1.1', type: 'Sub-Agen', p: 150 },
+        { id: 'W1.2', type: 'Sub-Agen', p: 100 },
+        { id: 'W2.1', type: 'Sub-Agen', p: 180 },
+        { id: 'W2.2', type: 'Sub-Agen', p: 120 },
+        { id: 'W3.1', type: 'Sub-Agen', p: 200 },
+        { id: 'W3.2', type: 'Sub-Agen', p: 80 },
+      ]
+
+      const links = [
+        { source: 'S1', target: 'P1', dist: 7.0, access: 2 },
+        { source: 'S1', target: 'P2', dist: 20.0, access: 5 },
+        { source: 'S1', target: 'P3', dist: 11.0, access: 4 },
+        { source: 'P1', target: 'P2', dist: 8.7, access: 3 },
+        { source: 'P2', target: 'P3', dist: 7.3, access: 3 },
+        { source: 'P1', target: 'W1.1', dist: 3.3, access: 1 },
+        { source: 'P1', target: 'W1.2', dist: 5.2, access: 2 },
+        { source: 'W1.1', target: 'W1.2', dist: 4.0, access: 2 },
+        { source: 'P2', target: 'W2.1', dist: 5.0, access: 2 },
+        { source: 'P2', target: 'W2.2', dist: 8.8, access: 4 },
+        { source: 'W1.2', target: 'W2.1', dist: 10.0, access: 4 },
+        { source: 'W2.1', target: 'W2.2', dist: 6.8, access: 3 },
+        { source: 'P3', target: 'W3.1', dist: 4.6, access: 1 },
+        { source: 'P3', target: 'W3.2', dist: 5.9, access: 3 },
+        { source: 'W2.2', target: 'W3.1', dist: 7.6, access: 4 },
+        { source: 'W3.1', target: 'W3.2', dist: 4.7, access: 2 },
+      ]
+
+      let alpha = 0.5,
+        beta = 0.3,
+        gamma = 0.2
+      let mstNodes = new Set()
+      let mstLinks = []
+      let iteration = 0
+      let totalMstWeight = 0
+
+      // Visual Init
+      const width = document.getElementById('canvas-container').clientWidth
+      const height = document.getElementById('canvas-container').clientHeight
+      const svg = d3
+        .select('#canvas-container')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+
+      const simulation = d3
+        .forceSimulation(nodes)
+        .force(
+          'link',
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance(100),
+        )
+        .force('charge', d3.forceManyBody().strength(-800))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+
+      const linkElements = svg
+        .append('g')
+        .selectAll('line')
+        .data(links)
+        .enter()
+        .append('line')
+        .attr('class', 'link')
+        .attr('stroke', '#475569')
+
+      const nodeElements = svg
+        .append('g')
+        .selectAll('circle')
+        .data(nodes)
+        .enter()
+        .append('circle')
+        .attr('class', 'node')
+        .attr('r', (d) => (d.type === 'Pusat' ? 15 : 10))
+        .attr('fill', (d) =>
+          d.type === 'Pusat'
+            ? '#f59e0b'
+            : d.type === 'Pangkalan'
+              ? '#3b82f6'
+              : '#10b981',
+        )
+        .call(
+          d3
+            .drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended),
+        )
+
+      const labels = svg
+        .append('g')
+        .selectAll('text')
+        .data(nodes)
+        .enter()
+        .append('text')
+        .text((d) => d.id)
+        .attr('font-size', 10)
+        .attr('fill', '#94a3b8')
+        .attr('dx', 15)
+        .attr('dy', 4)
+
+      simulation.on('tick', () => {
+        linkElements
+          .attr('x1', (d) => d.source.x)
+          .attr('y1', (d) => d.source.y)
+          .attr('x2', (d) => d.target.x)
+          .attr('y2', (d) => d.target.y)
+        nodeElements.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
+        labels.attr('x', (d) => d.x).attr('y', (d) => d.y)
+      })
+
+      // Prim Logic
+      function calculateWeight(edge) {
+        const targetNode = nodes.find(
+          (n) =>
+            n.id ===
+            (typeof edge.target === 'object' ? edge.target.id : edge.target),
+        )
+        const termLPG = targetNode.p === 0 ? 0 : 100 / targetNode.p
+        return alpha * edge.dist + beta * edge.access + gamma * termLPG
+      }
+
+      function runStep() {
+        if (iteration === 0) {
+          mstNodes.add('S1')
+          iteration++
+          logAction('Inisialisasi: Root ditetapkan di S1.')
+          updateVisuals()
+          return
+        }
+
+        if (mstNodes.size >= nodes.length) {
+          logAction('Selesai: Semua simpul telah terhubung ke MST.')
+          return
+        }
+
+        let bestEdge = null
+        let minWeight = Infinity
+
+        links.forEach((edge) => {
+          const u =
+            typeof edge.source === 'object' ? edge.source.id : edge.source
+          const v =
+            typeof edge.target === 'object' ? edge.target.id : edge.target
+
+          const uIn = mstNodes.has(u)
+          const vIn = mstNodes.has(v)
+
+          if (uIn !== vIn) {
+            const w = calculateWeight(edge)
+            if (w < minWeight) {
+              minWeight = w
+              bestEdge = edge
+            }
+          }
+        })
+
+        if (bestEdge) {
+          const u =
+            typeof bestEdge.source === 'object'
+              ? bestEdge.source.id
+              : bestEdge.source
+          const v =
+            typeof bestEdge.target === 'object'
+              ? bestEdge.target.id
+              : bestEdge.target
+
+          const newNode = mstNodes.has(u) ? v : u
+          mstNodes.add(newNode)
+          mstLinks.push(bestEdge)
+          totalMstWeight += minWeight
+          iteration++
+
+          logAction(
+            `Iterasi ${iteration - 1}: Sisi ${u}-${v} terpilih (W=${minWeight.toFixed(2)}).`,
+          )
+          updateVisuals()
+        }
+      }
+
+      function updateVisuals() {
+        linkElements.attr('class', (d) =>
+          mstLinks.includes(d) ? 'mst-link' : 'link',
+        )
+        nodeElements.attr('class', (d) =>
+          mstNodes.has(d.id) ? 'node highlight-node' : 'node',
+        )
+
+        document.getElementById('stat-edges').innerText = `${mstLinks.length}/9`
+        document.getElementById('stat-weight').innerText =
+          totalMstWeight.toFixed(2)
+        document.getElementById('stat-iter').innerText = iteration
+      }
+
+      function logAction(msg) {
+        const log = document.getElementById('log')
+        log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`
+        log.scrollTop = log.scrollHeight
+      }
+
+      // Listeners
+      document.getElementById('btn-next').onclick = runStep
+      document.getElementById('btn-reset').onclick = () => location.reload()
+
+      ;['alpha', 'beta', 'gamma'].forEach((id) => {
+        document.getElementById(id).oninput = (e) => {
+          const val = parseFloat(e.target.value)
+          if (id === 'alpha') alpha = val
+          if (id === 'beta') beta = val
+          if (id === 'gamma') gamma = val
+          document.getElementById(`v-${id}`).innerText = val.toFixed(1)
+        }
+      })
+
+      function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart()
+        event.subject.fx = event.subject.x
+        event.subject.fy = event.subject.y
+      }
+      function dragged(event) {
+        event.subject.fx = event.x
+        event.subject.fy = event.y
+      }
+      function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0)
+        event.subject.fx = null
+        event.subject.fy = null
+      }
+    </script>
+  </body>
+</html>
