@@ -1,410 +1,386 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LPG-3T Optimizer: Prim Interactive Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-      body {
-        font-family: 'JetBrains+Mono', monospace;
-        background-color: #0f172a;
-        color: #e2e8f0;
-      }
-      .node {
-        stroke: #1e293b;
-        stroke-width: 2px;
-        transition: all 0.3s;
-      }
-      .link {
-        stroke-opacity: 0.2;
-        stroke-width: 1px;
-        transition: all 0.3s;
-      }
-      .mst-link {
-        stroke: #2dd4bf;
-        stroke-opacity: 1;
-        stroke-width: 4px;
-        stroke-dasharray: 1000;
-        animation: draw 1s ease-out forwards;
-      }
-      @keyframes draw {
-        to {
-          stroke-dashoffset: 0;
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { font-family: 'JetBrains+Mono', monospace; background-color: #0f172a; color: #e2e8f0; }
+        
+        /* Node & Edge Styling */
+        .node { stroke: #1e293b; stroke-width: 2px; transition: all 0.3s; cursor: pointer; }
+        .link { stroke: #334155; stroke-opacity: 0.5; stroke-width: 1.5px; transition: all 0.3s; }
+        .mst-link { 
+            stroke: #2dd4bf; 
+            stroke-opacity: 1; 
+            stroke-width: 4px; 
+            stroke-dasharray: 1000; 
+            animation: draw 1s ease-out forwards; 
         }
-      }
-      .highlight-node {
-        stroke: #2dd4bf;
-        stroke-width: 4px;
-        filter: drop-shadow(0 0 8px #2dd4bf);
-      }
-      input[type='range'] {
-        accent-color: #2dd4bf;
-      }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+        
+        .highlight-node { stroke: #2dd4bf; stroke-width: 4px; filter: drop-shadow(0 0 8px #2dd4bf); }
+        .eval-link { stroke: #f59e0b; stroke-width: 3px; stroke-opacity: 0.8; stroke-dasharray: 5,5; animation: dash 1s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -10; } }
+        
+        input[type=range] { accent-color: #2dd4bf; }
+        
+        /* Glassmorphism Panels */
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(8px); border: 1px solid #334155; }
     </style>
-  </head>
-  <body class="p-4 md:p-8">
-    <div class="mx-auto max-w-6xl">
-      <header class="mb-8 border-b border-slate-700 pb-4">
-        <h1 class="text-3xl font-bold text-teal-400">
-          LPG-3T Optimizer
-          <span class="text-lg font-normal text-slate-500">v1.0</span>
-        </h1>
-        <p class="mt-2 text-slate-400">
-          Simulasi Algoritma Prim dengan Bobot Komposit Multidimensi untuk
-          Wilayah 3T.
-        </p>
-      </header>
-
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        <div
-          class="space-y-6 rounded-xl border border-slate-700 bg-slate-800/50 p-6 lg:col-span-1"
-        >
-          <div>
-            <h2
-              class="mb-4 text-sm font-bold tracking-wider text-teal-500 uppercase"
-            >
-              Parameter Bobot
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label class="mb-1 flex justify-between text-xs"
-                  ><span>Alpha (Jarak)</span
-                  ><span id="v-alpha">0.5</span></label
-                >
-                <input
-                  type="range"
-                  id="alpha"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value="0.5"
-                  class="w-full"
-                />
-              </div>
-              <div>
-                <label class="mb-1 flex justify-between text-xs"
-                  ><span>Beta (Akses)</span><span id="v-beta">0.3</span></label
-                >
-                <input
-                  type="range"
-                  id="beta"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value="0.3"
-                  class="w-full"
-                />
-              </div>
-              <div>
-                <label class="mb-1 flex justify-between text-xs"
-                  ><span>Gamma (LPG)</span><span id="v-gamma">0.2</span></label
-                >
-                <input
-                  type="range"
-                  id="gamma"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value="0.2"
-                  class="w-full"
-                />
-              </div>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col">
+    <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col">
+        <header class="mb-6 flex justify-between items-end border-b border-slate-700 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-teal-400 tracking-tight">LPG-3T Optimizer</h1>
+                <p class="text-slate-400 mt-1 text-sm">Simulasi Dinamis Algoritma Prim Berbasis Bobot Komposit</p>
             </div>
-          </div>
-
-          <div class="space-y-2 border-t border-slate-700 pt-4">
-            <button
-              id="btn-next"
-              class="w-full rounded bg-teal-600 py-2 font-bold text-white transition hover:bg-teal-500"
-            >
-              Next Step
+            <button id="btn-random" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-sm font-bold transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Randomize Data
             </button>
-            <button
-              id="btn-reset"
-              class="w-full rounded bg-slate-700 py-2 text-slate-300 transition hover:bg-slate-600"
-            >
-              Reset
-            </button>
-          </div>
+        </header>
 
-          <div
-            class="border-t border-slate-700 pt-4 text-xs text-slate-400 italic"
-          >
-            W(u,v) = α·J + β·IA + γ·(100/P)
-          </div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-grow">
+            <div class="lg:col-span-1 space-y-4 flex flex-col">
+                <div class="glass-panel p-5 rounded-xl">
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-teal-500 mb-4">Strategi & Parameter</h2>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs text-slate-400 mb-2">Preset Strategi</label>
+                        <select id="preset-strategy" class="w-full bg-slate-900 border border-slate-600 text-sm rounded p-2 text-slate-200 outline-none focus:border-teal-400">
+                            <option value="custom">-- Kustomisasi Manual --</option>
+                            <option value="jarak">Fokus Biaya BBM (Jarak Dominan)</option>
+                            <option value="akses">Fokus Keamanan (Akses Dominan)</option>
+                            <option value="warga">Fokus Pemerataan (Permintaan Dominan)</option>
+                            <option value="seimbang" selected>Seimbang (Default Tugas)</option>
+                        </select>
+                    </div>
 
-        <div
-          class="relative h-[600px] overflow-hidden rounded-xl border border-slate-700 bg-slate-900 lg:col-span-3"
-        >
-          <div id="canvas-container" class="h-full w-full"></div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex justify-between text-xs mb-1"><span class="text-slate-300">Bobot Jarak (&alpha;)</span><span id="v-alpha" class="font-bold text-teal-400">0.5</span></label>
+                            <input type="range" id="alpha" min="0" max="1" step="0.1" value="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-xs mb-1"><span class="text-slate-300">Bobot Akses (&beta;)</span><span id="v-beta" class="font-bold text-teal-400">0.3</span></label>
+                            <input type="range" id="beta" min="0" max="1" step="0.1" value="0.3" class="w-full">
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-xs mb-1"><span class="text-slate-300">Bobot LPG (&gamma;)</span><span id="v-gamma" class="font-bold text-teal-400">0.2</span></label>
+                            <input type="range" id="gamma" min="0" max="1" step="0.1" value="0.2" class="w-full">
+                        </div>
+                    </div>
+                </div>
 
-          <div
-            class="absolute right-4 bottom-4 rounded border border-slate-600 bg-slate-800/80 p-4 backdrop-blur-sm"
-          >
-            <h3 class="mb-2 text-xs font-bold text-teal-400 uppercase">
-              Status MST
-            </h3>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-              <span class="text-slate-500">Sisi Terpilih:</span>
-              <span id="stat-edges">0/9</span>
-              <span class="text-slate-500">Total Bobot:</span>
-              <span id="stat-weight">0.00</span>
-              <span class="text-slate-500">Iterasi:</span>
-              <span id="stat-iter">0</span>
+                <div class="glass-panel p-5 rounded-xl flex-grow flex flex-col">
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-teal-500 mb-3">Komputasi Algoritma</h2>
+                    <div id="calc-panel" class="flex-grow flex items-center justify-center text-center p-4 bg-slate-900/50 rounded border border-slate-700 mb-4">
+                        <span class="text-slate-500 text-xs italic">Klik 'Next Step' untuk melihat evaluasi sisi terkecil.</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-auto">
+                        <button id="btn-next" class="py-2 bg-teal-600 hover:bg-teal-500 text-white rounded font-bold text-sm transition">Next Step</button>
+                        <button id="btn-reset" class="py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-sm transition">Reset</button>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div
-        class="mt-8 h-32 overflow-y-auto rounded border border-slate-700 bg-slate-800/30 p-4 text-xs"
-        id="log"
-      >
-        <div class="text-teal-500">
-          [System] Menunggu inisialisasi... Klik 'Next Step' untuk memulai dari
-          S1.
+            <div class="lg:col-span-3 bg-slate-900 rounded-xl border border-slate-700 relative overflow-hidden min-h-[500px]">
+                <div id="canvas-container" class="w-full h-full"></div>
+                
+                <div class="absolute top-4 left-4 glass-panel px-3 py-2 rounded">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Legenda</div>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-orange-500"></div> Pusat (SPBE)</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div> Pangkalan Desa</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-emerald-500"></div> Sub-Agen</div>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-4 right-4 glass-panel p-4 rounded w-48">
+                    <h3 class="text-xs font-bold text-teal-400 mb-2 uppercase border-b border-slate-600 pb-1">Status MST</h3>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Iterasi:</span> <span id="stat-iter" class="font-bold">0</span></div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Sisi Terpilih:</span> <span id="stat-edges" class="font-bold">0 / 9</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-slate-400">Total Bobot:</span> <span id="stat-weight" class="font-bold text-teal-300">0.00</span></div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <script>
-      // Data Nodes & Edges berdasarkan PPT Kelompok 3 [cite: 134-138, 206-250]
-      const nodes = [
-        { id: 'S1', type: 'Pusat', p: 0 },
-        { id: 'P1', type: 'Pangkalan', p: 250 },
-        { id: 'P2', type: 'Pangkalan', p: 300 },
-        { id: 'P3', type: 'Pangkalan', p: 280 },
-        { id: 'W1.1', type: 'Sub-Agen', p: 150 },
-        { id: 'W1.2', type: 'Sub-Agen', p: 100 },
-        { id: 'W2.1', type: 'Sub-Agen', p: 180 },
-        { id: 'W2.2', type: 'Sub-Agen', p: 120 },
-        { id: 'W3.1', type: 'Sub-Agen', p: 200 },
-        { id: 'W3.2', type: 'Sub-Agen', p: 80 },
-      ]
+        // Data Dasar
+        const baseNodes = [
+            { id: "S1", type: "Pusat", p: 0 }, { id: "P1", type: "Pangkalan", p: 250 }, { id: "P2", type: "Pangkalan", p: 300 },
+            { id: "P3", type: "Pangkalan", p: 280 }, { id: "W1.1", type: "Sub-Agen", p: 150 }, { id: "W1.2", type: "Sub-Agen", p: 100 },
+            { id: "W2.1", type: "Sub-Agen", p: 180 }, { id: "W2.2", type: "Sub-Agen", p: 120 }, { id: "W3.1", type: "Sub-Agen", p: 200 },
+            { id: "W3.2", type: "Sub-Agen", p: 80 }
+        ];
 
-      const links = [
-        { source: 'S1', target: 'P1', dist: 7.0, access: 2 },
-        { source: 'S1', target: 'P2', dist: 20.0, access: 5 },
-        { source: 'S1', target: 'P3', dist: 11.0, access: 4 },
-        { source: 'P1', target: 'P2', dist: 8.7, access: 3 },
-        { source: 'P2', target: 'P3', dist: 7.3, access: 3 },
-        { source: 'P1', target: 'W1.1', dist: 3.3, access: 1 },
-        { source: 'P1', target: 'W1.2', dist: 5.2, access: 2 },
-        { source: 'W1.1', target: 'W1.2', dist: 4.0, access: 2 },
-        { source: 'P2', target: 'W2.1', dist: 5.0, access: 2 },
-        { source: 'P2', target: 'W2.2', dist: 8.8, access: 4 },
-        { source: 'W1.2', target: 'W2.1', dist: 10.0, access: 4 },
-        { source: 'W2.1', target: 'W2.2', dist: 6.8, access: 3 },
-        { source: 'P3', target: 'W3.1', dist: 4.6, access: 1 },
-        { source: 'P3', target: 'W3.2', dist: 5.9, access: 3 },
-        { source: 'W2.2', target: 'W3.1', dist: 7.6, access: 4 },
-        { source: 'W3.1', target: 'W3.2', dist: 4.7, access: 2 },
-      ]
+        const baseLinks = [
+            { source: "S1", target: "P1", dist: 7.0, access: 2 }, { source: "S1", target: "P2", dist: 20.0, access: 5 },
+            { source: "S1", target: "P3", dist: 11.0, access: 4 }, { source: "P1", target: "P2", dist: 8.7, access: 3 },
+            { source: "P2", target: "P3", dist: 7.3, access: 3 }, { source: "P1", target: "W1.1", dist: 3.3, access: 1 },
+            { source: "P1", target: "W1.2", dist: 5.2, access: 2 }, { source: "W1.1", target: "W1.2", dist: 4.0, access: 2 },
+            { source: "P2", target: "W2.1", dist: 5.0, access: 2 }, { source: "P2", target: "W2.2", dist: 8.8, access: 4 },
+            { source: "W1.2", target: "W2.1", dist: 10.0, access: 4 }, { source: "W2.1", target: "W2.2", dist: 6.8, access: 3 },
+            { source: "P3", target: "W3.1", dist: 4.6, access: 1 }, { source: "P3", target: "W3.2", dist: 5.9, access: 3 },
+            { source: "W2.2", target: "W3.1", dist: 7.6, access: 4 }, { source: "W3.1", target: "W3.2", dist: 4.7, access: 2 }
+        ];
 
-      let alpha = 0.5,
-        beta = 0.3,
-        gamma = 0.2
-      let mstNodes = new Set()
-      let mstLinks = []
-      let iteration = 0
-      let totalMstWeight = 0
+        let nodes = JSON.parse(JSON.stringify(baseNodes));
+        let links = JSON.parse(JSON.stringify(baseLinks));
+        
+        let alpha = 0.5, beta = 0.3, gamma = 0.2;
+        let mstNodes = new Set();
+        let mstLinks = [];
+        let iteration = 0;
+        let totalMstWeight = 0;
 
-      // Visual Init
-      const width = document.getElementById('canvas-container').clientWidth
-      const height = document.getElementById('canvas-container').clientHeight
-      const svg = d3
-        .select('#canvas-container')
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
+        // D3 Visualisasi Setup
+        const container = document.getElementById('canvas-container');
+        const width = container.clientWidth;
+        const height = container.clientHeight || 500;
+        const svg = d3.select("#canvas-container").append("svg").attr("width", "100%").attr("height", "100%");
 
-      const simulation = d3
-        .forceSimulation(nodes)
-        .force(
-          'link',
-          d3
-            .forceLink(links)
-            .id((d) => d.id)
-            .distance(100),
-        )
-        .force('charge', d3.forceManyBody().strength(-800))
-        .force('center', d3.forceCenter(width / 2, height / 2))
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-1000))
+            .force("center", d3.forceCenter(width / 2, height / 2));
 
-      const linkElements = svg
-        .append('g')
-        .selectAll('line')
-        .data(links)
-        .enter()
-        .append('line')
-        .attr('class', 'link')
-        .attr('stroke', '#475569')
+        let linkElements = svg.append("g").selectAll(".link");
+        let linkLabels = svg.append("g").selectAll(".link-label");
+        let nodeElements = svg.append("g").selectAll(".node");
+        let nodeLabels = svg.append("g").selectAll(".node-label");
 
-      const nodeElements = svg
-        .append('g')
-        .selectAll('circle')
-        .data(nodes)
-        .enter()
-        .append('circle')
-        .attr('class', 'node')
-        .attr('r', (d) => (d.type === 'Pusat' ? 15 : 10))
-        .attr('fill', (d) =>
-          d.type === 'Pusat'
-            ? '#f59e0b'
-            : d.type === 'Pangkalan'
-              ? '#3b82f6'
-              : '#10b981',
-        )
-        .call(
-          d3
-            .drag()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended),
-        )
+        function calculateWeightInfo(edge) {
+            const uId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const vId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+            
+            // Logika prioritas target node (untuk komponen 100/P)
+            let targetNode = nodes.find(n => n.id === vId);
+            if(mstNodes.has(vId) && !mstNodes.has(uId)) targetNode = nodes.find(n => n.id === uId);
 
-      const labels = svg
-        .append('g')
-        .selectAll('text')
-        .data(nodes)
-        .enter()
-        .append('text')
-        .text((d) => d.id)
-        .attr('font-size', 10)
-        .attr('fill', '#94a3b8')
-        .attr('dx', 15)
-        .attr('dy', 4)
-
-      simulation.on('tick', () => {
-        linkElements
-          .attr('x1', (d) => d.source.x)
-          .attr('y1', (d) => d.source.y)
-          .attr('x2', (d) => d.target.x)
-          .attr('y2', (d) => d.target.y)
-        nodeElements.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
-        labels.attr('x', (d) => d.x).attr('y', (d) => d.y)
-      })
-
-      // Prim Logic
-      function calculateWeight(edge) {
-        const targetNode = nodes.find(
-          (n) =>
-            n.id ===
-            (typeof edge.target === 'object' ? edge.target.id : edge.target),
-        )
-        const termLPG = targetNode.p === 0 ? 0 : 100 / targetNode.p
-        return alpha * edge.dist + beta * edge.access + gamma * termLPG
-      }
-
-      function runStep() {
-        if (iteration === 0) {
-          mstNodes.add('S1')
-          iteration++
-          logAction('Inisialisasi: Root ditetapkan di S1.')
-          updateVisuals()
-          return
+            const termJarak = alpha * edge.dist;
+            const termAkses = beta * edge.access;
+            const termLPG = gamma * (targetNode.p === 0 ? 0 : (100 / targetNode.p));
+            
+            return {
+                u: uId, v: vId, target: targetNode,
+                j: termJarak, a: termAkses, l: termLPG,
+                total: termJarak + termAkses + termLPG
+            };
         }
 
-        if (mstNodes.size >= nodes.length) {
-          logAction('Selesai: Semua simpul telah terhubung ke MST.')
-          return
+        function drawGraph() {
+            linkElements = linkElements.data(links);
+            linkElements.exit().remove();
+            linkElements = linkElements.enter().append("line")
+                .attr("class", "link").merge(linkElements);
+
+            linkLabels = linkLabels.data(links);
+            linkLabels.exit().remove();
+            linkLabels = linkLabels.enter().append("text")
+                .attr("class", "link-label text-[10px] fill-slate-500 font-mono")
+                .attr("text-anchor", "middle").attr("dy", -4).merge(linkLabels);
+
+            nodeElements = nodeElements.data(nodes, d => d.id);
+            nodeElements.exit().remove();
+            nodeElements = nodeElements.enter().append("circle")
+                .attr("class", "node")
+                .attr("r", d => d.type === "Pusat" ? 16 : 12)
+                .attr("fill", d => d.type === "Pusat" ? "#f97316" : (d.type === "Pangkalan" ? "#3b82f6" : "#10b981"))
+                .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
+                .merge(nodeElements);
+
+            nodeLabels = nodeLabels.data(nodes, d => d.id);
+            nodeLabels.exit().remove();
+            nodeLabels = nodeLabels.enter().append("text")
+                .attr("class", "node-label text-[10px] fill-slate-300 font-bold")
+                .attr("dx", 18).attr("dy", 4).text(d => d.id).merge(nodeLabels);
+
+            updateLinkWeights();
+            simulation.nodes(nodes);
+            simulation.force("link").links(links);
+            simulation.alpha(1).restart();
         }
 
-        let bestEdge = null
-        let minWeight = Infinity
+        function updateLinkWeights() {
+            linkLabels.text(d => calculateWeightInfo(d).total.toFixed(2));
+        }
 
-        links.forEach((edge) => {
-          const u =
-            typeof edge.source === 'object' ? edge.source.id : edge.source
-          const v =
-            typeof edge.target === 'object' ? edge.target.id : edge.target
+        simulation.on("tick", () => {
+            linkElements.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+            
+            linkLabels.attr("x", d => (d.source.x + d.target.x) / 2)
+                      .attr("y", d => (d.source.y + d.target.y) / 2);
 
-          const uIn = mstNodes.has(u)
-          const vIn = mstNodes.has(v)
+            nodeElements.attr("cx", d => Math.max(16, Math.min(width - 16, d.x)))
+                        .attr("cy", d => Math.max(16, Math.min(height - 16, d.y)));
+            
+            nodeLabels.attr("x", d => d.x).attr("y", d => d.y);
+        });
 
-          if (uIn !== vIn) {
-            const w = calculateWeight(edge)
-            if (w < minWeight) {
-              minWeight = w
-              bestEdge = edge
+        function animateCalculation(edgeInfo, callback) {
+            const calcPanel = document.getElementById('calc-panel');
+            
+            // Highlight garis sementara
+            linkElements.attr("class", d => {
+                if (mstLinks.includes(d)) return "mst-link";
+                if (d.source.id === edgeInfo.u && d.target.id === edgeInfo.v) return "eval-link";
+                return "link";
+            });
+
+            calcPanel.innerHTML = `
+                <div class="w-full text-left">
+                    <div class="text-[10px] text-slate-400 mb-1">Evaluasi Bobot Terkecil: <span class="text-amber-400 font-bold">${edgeInfo.u} &harr; ${edgeInfo.v}</span></div>
+                    <div class="font-mono text-[11px] bg-slate-950 p-3 rounded space-y-2 border border-slate-800">
+                        <div class="text-slate-500">W = &alpha;·Jarak + &beta;·Akses + &gamma;·(100/P)</div>
+                        <div class="animate-pulse text-teal-300">W = ${alpha}(${edgeInfo.j/alpha || 0}) + ${beta}(${edgeInfo.a/beta || 0}) + ${gamma}(100/${edgeInfo.target.p || '-'})</div>
+                        <div class="text-slate-300">W = ${edgeInfo.j.toFixed(2)} + ${edgeInfo.a.toFixed(2)} + ${edgeInfo.l.toFixed(2)}</div>
+                        <div class="border-t border-slate-700 pt-1 mt-1 text-sm font-bold text-teal-400">Total W = ${edgeInfo.total.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+
+            // Tunggu 1 detik biar user baca rumusnya, baru jadikan MST
+            setTimeout(() => {
+                callback();
+            }, 1500);
+        }
+
+        function runStep() {
+            if (iteration === 0) {
+                mstNodes.add("S1");
+                iteration++;
+                updateStatus();
+                document.getElementById('calc-panel').innerHTML = `<div class="text-sm font-bold text-teal-400">Root MST ditetapkan di S1</div>`;
+                return;
             }
-          }
-        })
 
-        if (bestEdge) {
-          const u =
-            typeof bestEdge.source === 'object'
-              ? bestEdge.source.id
-              : bestEdge.source
-          const v =
-            typeof bestEdge.target === 'object'
-              ? bestEdge.target.id
-              : bestEdge.target
+            if (mstNodes.size >= nodes.length) {
+                document.getElementById('calc-panel').innerHTML = `<div class="text-sm font-bold text-emerald-400">Proses Selesai! Semua node terhubung.</div>`;
+                return;
+            }
 
-          const newNode = mstNodes.has(u) ? v : u
-          mstNodes.add(newNode)
-          mstLinks.push(bestEdge)
-          totalMstWeight += minWeight
-          iteration++
+            let bestEdge = null;
+            let minWeight = Infinity;
+            let bestInfo = null;
 
-          logAction(
-            `Iterasi ${iteration - 1}: Sisi ${u}-${v} terpilih (W=${minWeight.toFixed(2)}).`,
-          )
-          updateVisuals()
+            links.forEach(edge => {
+                const u = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                const v = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+                if (mstNodes.has(u) !== mstNodes.has(v)) {
+                    const info = calculateWeightInfo(edge);
+                    if (info.total < minWeight) {
+                        minWeight = info.total;
+                        bestEdge = edge;
+                        bestInfo = info;
+                    }
+                }
+            });
+
+            if (bestEdge) {
+                document.getElementById('btn-next').disabled = true;
+                
+                animateCalculation(bestInfo, () => {
+                    mstNodes.add(bestInfo.target.id);
+                    mstLinks.push(bestEdge);
+                    totalMstWeight += bestInfo.total;
+                    iteration++;
+                    
+                    updateStatus();
+                    document.getElementById('btn-next').disabled = false;
+                });
+            }
         }
-      }
 
-      function updateVisuals() {
-        linkElements.attr('class', (d) =>
-          mstLinks.includes(d) ? 'mst-link' : 'link',
-        )
-        nodeElements.attr('class', (d) =>
-          mstNodes.has(d.id) ? 'node highlight-node' : 'node',
-        )
-
-        document.getElementById('stat-edges').innerText = `${mstLinks.length}/9`
-        document.getElementById('stat-weight').innerText =
-          totalMstWeight.toFixed(2)
-        document.getElementById('stat-iter').innerText = iteration
-      }
-
-      function logAction(msg) {
-        const log = document.getElementById('log')
-        log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`
-        log.scrollTop = log.scrollHeight
-      }
-
-      // Listeners
-      document.getElementById('btn-next').onclick = runStep
-      document.getElementById('btn-reset').onclick = () => location.reload()
-
-      ;['alpha', 'beta', 'gamma'].forEach((id) => {
-        document.getElementById(id).oninput = (e) => {
-          const val = parseFloat(e.target.value)
-          if (id === 'alpha') alpha = val
-          if (id === 'beta') beta = val
-          if (id === 'gamma') gamma = val
-          document.getElementById(`v-${id}`).innerText = val.toFixed(1)
+        function updateStatus() {
+            linkElements.attr("class", d => mstLinks.includes(d) ? "mst-link" : "link");
+            nodeElements.attr("class", d => mstNodes.has(d.id) ? "node highlight-node" : "node");
+            
+            document.getElementById('stat-edges').innerText = `${mstLinks.length} / 9`;
+            document.getElementById('stat-weight').innerText = totalMstWeight.toFixed(2);
+            document.getElementById('stat-iter').innerText = iteration;
         }
-      })
 
-      function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart()
-        event.subject.fx = event.subject.x
-        event.subject.fy = event.subject.y
-      }
-      function dragged(event) {
-        event.subject.fx = event.x
-        event.subject.fy = event.y
-      }
-      function dragended(event) {
-        if (!event.active) simulation.alphaTarget(0)
-        event.subject.fx = null
-        event.subject.fy = null
-      }
+        function resetSim() {
+            mstNodes.clear();
+            mstLinks = [];
+            iteration = 0;
+            totalMstWeight = 0;
+            document.getElementById('calc-panel').innerHTML = `<span class="text-slate-500 text-xs italic">Klik 'Next Step' untuk melihat evaluasi sisi terkecil.</span>`;
+            updateStatus();
+        }
+
+        function randomizeData() {
+            links.forEach(l => {
+                l.dist = parseFloat((Math.random() * 20 + 2).toFixed(1)); // Jarak 2.0 - 22.0
+                l.access = Math.floor(Math.random() * 5) + 1; // Akses 1 - 5
+            });
+            nodes.forEach(n => {
+                if(n.type !== "Pusat") n.p = Math.floor(Math.random() * 250) + 50; // LPG 50 - 300
+            });
+            updateLinkWeights();
+            resetSim();
+            document.getElementById('calc-panel').innerHTML = `<div class="text-sm text-indigo-400">Data lapangan (Jarak, Akses, LPG) telah diacak!</div>`;
+        }
+
+        // Event Listeners
+        document.getElementById('btn-next').onclick = runStep;
+        document.getElementById('btn-reset').onclick = resetSim;
+        document.getElementById('btn-random').onclick = randomizeData;
+
+        // Sliders & Preset
+        const sliders = ['alpha', 'beta', 'gamma'];
+        sliders.forEach(id => {
+            document.getElementById(id).oninput = (e) => {
+                document.getElementById('preset-strategy').value = 'custom';
+                updateFromSliders();
+            };
+        });
+
+        document.getElementById('preset-strategy').onchange = (e) => {
+            const val = e.target.value;
+            if(val === 'jarak') { alpha=0.7; beta=0.2; gamma=0.1; }
+            else if(val === 'akses') { alpha=0.2; beta=0.7; gamma=0.1; }
+            else if(val === 'warga') { alpha=0.2; beta=0.2; gamma=0.6; }
+            else if(val === 'seimbang') { alpha=0.5; beta=0.3; gamma=0.2; }
+            
+            if(val !== 'custom') {
+                document.getElementById('alpha').value = alpha;
+                document.getElementById('beta').value = beta;
+                document.getElementById('gamma').value = gamma;
+                updateFromSliders();
+            }
+        };
+
+        function updateFromSliders() {
+            alpha = parseFloat(document.getElementById('alpha').value);
+            beta = parseFloat(document.getElementById('beta').value);
+            gamma = parseFloat(document.getElementById('gamma').value);
+            
+            document.getElementById('v-alpha').innerText = alpha.toFixed(1);
+            document.getElementById('v-beta').innerText = beta.toFixed(1);
+            document.getElementById('v-gamma').innerText = gamma.toFixed(1);
+            
+            updateLinkWeights();
+            resetSim();
+        }
+
+        // D3 Drag
+        function dragstarted(event) { if (!event.active) simulation.alphaTarget(0.3).restart(); event.subject.fx = event.subject.x; event.subject.fy = event.subject.y; }
+        function dragged(event) { event.subject.fx = event.x; event.subject.fy = event.y; }
+        function dragended(event) { if (!event.active) simulation.alphaTarget(0); event.subject.fx = null; event.subject.fy = null; }
+
+        // Initial Draw
+        drawGraph();
     </script>
-  </body>
+</body>
 </html>
