@@ -234,14 +234,43 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-4 lg:col-span-3">
+        <div class="flex min-h-0 flex-col gap-4 lg:col-span-3">
           <div
-            class="relative h-[450px] overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-lg"
+            class="glass-panel relative flex min-h-[640px] flex-col overflow-hidden rounded-xl border border-slate-700 shadow-lg"
           >
-            <div id="canvas-container" class="h-full w-full"></div>
+            <div
+              class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 bg-slate-800/80 px-4 py-3"
+            >
+              <div>
+                <h2
+                  class="flex items-center gap-2 text-sm font-bold text-slate-100"
+                >
+                  <i
+                    class="ph-bold ph-projector-screen-chart text-teal-400"
+                  ></i>
+                  Peta Jaringan Prim
+                </h2>
+                <p class="mt-1 text-xs text-slate-400">
+                  Geser graf untuk memindahkan viewport, scroll untuk zoom.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  id="btn-center"
+                  class="rounded border border-slate-600 bg-slate-900/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-teal-400 hover:text-teal-300"
+                >
+                  Reset View
+                </button>
+              </div>
+            </div>
 
             <div
-              class="glass-panel absolute top-4 left-4 rounded px-4 py-3 shadow-lg"
+              id="canvas-container"
+              class="relative min-h-[520px] flex-1 overflow-hidden"
+            ></div>
+
+            <div
+              class="glass-panel pointer-events-none absolute top-4 left-4 rounded px-4 py-3 shadow-lg"
             >
               <div
                 class="mb-3 flex items-center gap-2 text-xs font-bold tracking-wider text-slate-300 uppercase"
@@ -271,7 +300,7 @@
             </div>
 
             <div
-              class="glass-panel absolute right-4 bottom-4 w-56 rounded p-4 shadow-lg"
+              class="glass-panel pointer-events-none absolute top-4 right-4 w-56 rounded p-4 shadow-lg"
             >
               <h3
                 class="mb-3 flex items-center gap-2 border-b border-slate-600 pb-2 text-xs font-bold text-teal-400 uppercase"
@@ -296,7 +325,7 @@
           </div>
 
           <div
-            class="glass-panel flex h-[200px] flex-grow flex-col overflow-hidden rounded-xl border border-slate-700 shadow-lg"
+            class="glass-panel flex h-[220px] flex-none flex-col overflow-hidden rounded-xl border border-slate-700 shadow-lg"
           >
             <div
               class="flex items-center gap-2 border-b border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-bold tracking-wider text-slate-300 uppercase"
@@ -367,13 +396,25 @@
 
       // D3 Visualisasi Setup
       const container = document.getElementById('canvas-container')
-      const width = container.clientWidth
-      const height = container.clientHeight || 450
+      let width = container.clientWidth
+      let height = container.clientHeight || 520
       const svg = d3
         .select('#canvas-container')
         .append('svg')
         .attr('width', '100%')
         .attr('height', '100%')
+        .style('cursor', 'grab')
+        .style('touch-action', 'none')
+
+      const graphRoot = svg.append('g')
+      const zoom = d3
+        .zoom()
+        .scaleExtent([0.65, 2.5])
+        .on('zoom', (event) => {
+          graphRoot.attr('transform', event.transform)
+        })
+
+      svg.call(zoom)
 
       const simulation = d3
         .forceSimulation(nodes)
@@ -387,10 +428,32 @@
         .force('charge', d3.forceManyBody().strength(-1200))
         .force('center', d3.forceCenter(width / 2, height / 2))
 
-      let linkElements = svg.append('g').selectAll('.link')
-      let linkLabels = svg.append('g').selectAll('.link-label')
-      let nodeElements = svg.append('g').selectAll('.node')
-      let nodeLabels = svg.append('g').selectAll('.node-label')
+      const linkLayer = graphRoot.append('g')
+      const labelLayer = graphRoot.append('g')
+      const nodeLayer = graphRoot.append('g')
+      const nodeLabelLayer = graphRoot.append('g')
+
+      let linkElements = linkLayer.selectAll('.link')
+      let linkLabels = labelLayer.selectAll('.link-label')
+      let nodeElements = nodeLayer.selectAll('.node')
+      let nodeLabels = nodeLabelLayer.selectAll('.node-label')
+
+      function resizeGraph() {
+        const bounds = container.getBoundingClientRect()
+        width = Math.max(320, bounds.width)
+        height = Math.max(520, bounds.height)
+
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
+        simulation.force('center', d3.forceCenter(width / 2, height / 2))
+        simulation.alpha(0.25).restart()
+      }
+
+      const resizeObserver = new ResizeObserver(() => {
+        resizeGraph()
+      })
+      resizeObserver.observe(container)
+
+      resizeGraph()
 
       // Logger Function
       function logAction(msg, type = 'info') {
@@ -441,7 +504,7 @@
       }
 
       function drawGraph() {
-        linkElements = linkElements.data(links)
+        linkElements = linkLayer.selectAll('.link').data(links)
         linkElements.exit().remove()
         linkElements = linkElements
           .enter()
@@ -450,7 +513,7 @@
           .merge(linkElements)
 
         // Font dibesarkan untuk link label
-        linkLabels = linkLabels.data(links)
+        linkLabels = labelLayer.selectAll('.link-label').data(links)
         linkLabels.exit().remove()
         linkLabels = linkLabels
           .enter()
@@ -467,7 +530,7 @@
           .merge(linkLabels)
 
         // Node radius dibesarkan
-        nodeElements = nodeElements.data(nodes, (d) => d.id)
+        nodeElements = nodeLayer.selectAll('.node').data(nodes, (d) => d.id)
         nodeElements.exit().remove()
         nodeElements = nodeElements
           .enter()
@@ -493,7 +556,9 @@
           .merge(nodeElements)
 
         // Font dibesarkan untuk node label
-        nodeLabels = nodeLabels.data(nodes, (d) => d.id)
+        nodeLabels = nodeLabelLayer
+          .selectAll('.node-label')
+          .data(nodes, (d) => d.id)
         nodeLabels.exit().remove()
         nodeLabels = nodeLabels
           .enter()
@@ -533,6 +598,10 @@
 
         nodeLabels.attr('x', (d) => d.x).attr('y', (d) => d.y)
       })
+
+      function resetGraphView() {
+        svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity)
+      }
 
       function animateCalculation(edgeInfo, callback) {
         const calcPanel = document.getElementById('calc-panel')
@@ -674,6 +743,7 @@
       document.getElementById('btn-next').onclick = runStep
       document.getElementById('btn-reset').onclick = resetSim
       document.getElementById('btn-random').onclick = randomizeData
+      document.getElementById('btn-center').onclick = resetGraphView
 
       // Sliders & Preset
       const sliders = ['alpha', 'beta', 'gamma']
